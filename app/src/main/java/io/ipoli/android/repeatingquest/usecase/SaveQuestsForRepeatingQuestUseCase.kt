@@ -154,7 +154,7 @@ class SaveQuestsForRepeatingQuestUseCase(
             if (scheduledDateToQuest.containsKey(it)) {
                 scheduledDateToQuest[it]!!
             } else {
-                val q = createQuest(rq, it)
+                val q = Quest.createFromRepeatingQuest(repeatingQuest = rq, scheduleDate = it)
                 questsToSave.add(q)
                 q
             }
@@ -255,28 +255,7 @@ class SaveQuestsForRepeatingQuestUseCase(
             daysOfWeek.shuffled().take(timesPerWeek)
         }
         return days.map { period.start.with(nextOrSame(it)) }
-
     }
-
-    private fun createQuest(
-        rq: RepeatingQuest,
-        scheduleDate: LocalDate
-    ) =
-        Quest(
-            name = rq.name,
-            subQuests = rq.subQuests,
-            color = rq.color,
-            icon = rq.icon,
-            startTime = rq.startTime,
-            duration = rq.duration,
-            priority = rq.priority,
-            preferredStartTime = rq.preferredStartTime,
-            scheduledDate = scheduleDate,
-            reminders = rq.reminders,
-            repeatingQuestId = rq.id,
-            challengeId = rq.challengeId,
-            tags = rq.tags
-        )
 
     data class Result(val quests: List<Quest>, val repeatingQuest: RepeatingQuest)
 

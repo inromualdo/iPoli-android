@@ -360,6 +360,7 @@ interface UseCaseModule {
     val saveQuestsForRepeatingQuestUseCase: SaveQuestsForRepeatingQuestUseCase
     val removeRepeatingQuestUseCase: RemoveRepeatingQuestUseCase
     val createRepeatingQuestHistoryUseCase: CreateRepeatingQuestHistoryUseCase
+    val addQuestToRepeatingQuestUseCase: AddQuestToRepeatingQuestUseCase
     val createPlaceholderQuestsForRepeatingQuestsUseCase: CreatePlaceholderQuestsForRepeatingQuestsUseCase
     val saveChallengeUseCase: SaveChallengeUseCase
     val saveQuestsForChallengeUseCase: SaveQuestsForChallengeUseCase
@@ -733,6 +734,10 @@ class MainUseCaseModule(private val context: Context) : UseCaseModule {
             questRepository,
             repeatingQuestRepository
         )
+
+    override val addQuestToRepeatingQuestUseCase
+        get() = AddQuestToRepeatingQuestUseCase(repeatingQuestRepository, questRepository)
+
     override val createPlaceholderQuestsForRepeatingQuestsUseCase
         get() = CreatePlaceholderQuestsForRepeatingQuestsUseCase(
             questRepository,

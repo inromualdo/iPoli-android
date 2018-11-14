@@ -77,6 +77,15 @@ class RepeatingQuestViewController(args: Bundle? = null) :
         view.subQuestList.layoutManager = LinearLayoutManager(activity!!)
         view.subQuestList.adapter = SubQuestsAdapter()
 
+        view.addQuest.onDebounceClick {
+            navigate().toReschedule(
+                includeToday = true,
+                isNewQuest = true,
+                listener = { date, time, _ ->
+                    dispatch(RepeatingQuestAction.AddQuest(repeatingQuestId, date, time))
+                })
+        }
+
         return view
     }
 

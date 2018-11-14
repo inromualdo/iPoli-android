@@ -710,6 +710,7 @@
     <string name="next_week">Next week</string>
     <string name="choose_date">Choose date</string>
     <string name="reschedule">Reschedule</string>
+    <string name="schedule_new_quest">Schedule new Quest</string>
     <string name="days_to_plan">Days to plan</string>
     <string name="plan_my_day_at">Plan my day at</string>
     <string name="my_day">My Day</string>

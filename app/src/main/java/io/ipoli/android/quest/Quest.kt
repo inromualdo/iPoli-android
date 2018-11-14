@@ -243,6 +243,30 @@ data class Quest(
     val isFromRepeatingQuest get() = repeatingQuestId != null
 
     val isFromChallenge get() = challengeId != null
+
+    companion object {
+        fun createFromRepeatingQuest(
+            repeatingQuest: RepeatingQuest,
+            scheduleDate: LocalDate? = null,
+            startTime: Time? = null
+        ) =
+            Quest(
+                name = repeatingQuest.name,
+                subQuests = repeatingQuest.subQuests,
+                color = repeatingQuest.color,
+                icon = repeatingQuest.icon,
+                startTime = startTime ?: repeatingQuest.startTime,
+                duration = repeatingQuest.duration,
+                priority = repeatingQuest.priority,
+                preferredStartTime = repeatingQuest.preferredStartTime,
+                scheduledDate = scheduleDate,
+                originalScheduledDate = scheduleDate,
+                reminders = repeatingQuest.reminders,
+                repeatingQuestId = repeatingQuest.id,
+                challengeId = repeatingQuest.challengeId,
+                tags = repeatingQuest.tags
+            )
+    }
 }
 
 data class TimeRange(

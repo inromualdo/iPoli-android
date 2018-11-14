@@ -32,6 +32,9 @@ sealed class RepeatingQuestAction : Action {
     data class Remove(val repeatingQuestId: String) : RepeatingQuestAction() {
         override fun toMap() = mapOf("repeatingQuestId" to repeatingQuestId)
     }
+
+    data class AddQuest(val repeatingQuestId: String, val date: LocalDate?, val time: Time?) :
+        RepeatingQuestAction()
 }
 
 data class RepeatingQuestViewState(
@@ -145,7 +148,9 @@ object RepeatingQuestReducer : BaseViewStateReducer<RepeatingQuestViewState>() {
                 repeatPattern.periodCount
             )
 
-            is RepeatPattern.EveryXDays -> RepeatingQuestViewState.RepeatType.EveryXDays(repeatPattern.xDays)
+            is RepeatPattern.EveryXDays -> RepeatingQuestViewState.RepeatType.EveryXDays(
+                repeatPattern.xDays
+            )
 
             is RepeatPattern.Monthly, is RepeatPattern.Flexible.Monthly -> RepeatingQuestViewState.RepeatType.Monthly(
                 repeatPattern.periodCount
