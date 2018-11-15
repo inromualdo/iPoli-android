@@ -86,6 +86,22 @@ class RepeatPatternSpek : Spek({
                     )
                     shouldHaveNextDate(pattern.nextDate(today), tuesday)
                 }
+
+                it("should find date considering skip week") {
+                    val today =
+                        DateUtils.today.with(TemporalAdjusters.previousOrSame(DayOfWeek.WEDNESDAY))
+                    val pattern =
+                        RepeatPattern.Weekly(setOf(DayOfWeek.MONDAY), today, skipEveryXWeeks = 1)
+                    shouldHaveNextDate(pattern.nextDate(today), today.plusWeeks(1).plusDays(5))
+                }
+
+                it("should find date considering and not skip week") {
+                    val today =
+                        DateUtils.today.with(TemporalAdjusters.previousOrSame(DayOfWeek.WEDNESDAY))
+                    val pattern =
+                        RepeatPattern.Weekly(setOf(DayOfWeek.MONDAY), today, skipEveryXWeeks = 1)
+                    shouldHaveNextDate(pattern.nextDate(today.plusWeeks(1).plusDays(5)), today.plusWeeks(1).plusDays(5))
+                }
             }
 
             describe("Flexible") {
