@@ -57,8 +57,10 @@ sealed class RepeatPattern {
 
         override val periodCount get() = DayOfWeek.values().size
 
-        private fun shouldBeDoneOn(date: LocalDate) =
-            startDate.daysUntil(date) % skipEveryXPeriods == 0L
+        private fun shouldBeDoneOn(date: LocalDate): Boolean {
+            if(skipEveryXPeriods == 0) return true
+            return startDate.daysUntil(date) % skipEveryXPeriods == 0L
+        }
 
         override fun doCreateSchedule(currentDate: LocalDate): Schedule {
             val nextMonday = currentDate.plusWeeks(1).with(
