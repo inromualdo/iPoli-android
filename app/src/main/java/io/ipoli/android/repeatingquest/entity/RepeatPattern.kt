@@ -1,9 +1,6 @@
 package io.ipoli.android.repeatingquest.entity
 
-import io.ipoli.android.common.datetime.datesBetween
-import io.ipoli.android.common.datetime.daysUntil
-import io.ipoli.android.common.datetime.isBetween
-import io.ipoli.android.common.datetime.weeksUntil
+import io.ipoli.android.common.datetime.*
 import org.threeten.bp.DayOfWeek
 import org.threeten.bp.LocalDate
 import org.threeten.bp.Month
@@ -92,7 +89,8 @@ sealed class RepeatPattern(
     data class Monthly(
         val daysOfMonth: Set<Int>,
         override val startDate: LocalDate = LocalDate.now(),
-        override val endDate: LocalDate? = null
+        override val endDate: LocalDate? = null,
+        val skipEveryXMonths: Int = 0
     ) : RepeatPattern(startDate, endDate) {
 
         override fun periodRangeFor(date: LocalDate) =
@@ -105,10 +103,16 @@ sealed class RepeatPattern(
 
         override fun nextDateWithoutRange(from: LocalDate): LocalDate? {
             require(daysOfMonth.isNotEmpty())
+
+            val doEveryXMonths = skipEveryXMonths + 1
+
+            val schedulePeriodStart = periodRangeFor(startDate).start
             var nextDate = from
 
             while (true) {
-                if (daysOfMonth.contains(nextDate.dayOfMonth)) {
+                val monthsPassed = schedulePeriodStart.monthsUntil(nextDate)
+                val shouldDoOnMonth = monthsPassed % doEveryXMonths == 0L
+                if (shouldDoOnMonth && daysOfMonth.contains(nextDate.dayOfMonth)) {
                     return nextDate
                 }
                 nextDate = nextDate.plusDays(1)
