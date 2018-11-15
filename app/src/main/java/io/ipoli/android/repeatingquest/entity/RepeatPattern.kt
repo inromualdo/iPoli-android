@@ -67,7 +67,7 @@ sealed class RepeatPattern {
                     periodStart = periodStart.plusWeeks(1)
                 }
             }
-            if(periodStart.isBefore(startDate)) {
+            if (periodStart.isBefore(startDate)) {
                 periodStart = startDate
             }
             return periodStart.datesBetween(endDate).filter { shouldBeDoneOn(it) }
@@ -309,16 +309,14 @@ sealed class RepeatPattern {
 
                 val daysOfWeek = DayOfWeek.values().toList()
                 val days = if (preferredDays.isNotEmpty()) {
-                    val scheduledWeekDays = preferredDays.shuffled().take(timesPerWeek)
-                    val remainingWeekDays =
-                        (daysOfWeek - scheduledWeekDays).shuffled()
-                            .take(timesPerWeek - scheduledWeekDays.size)
-                    scheduledWeekDays + remainingWeekDays
+                    preferredDays.shuffled().take(timesPerWeek)
                 } else {
                     daysOfWeek.shuffled().take(timesPerWeek)
                 }
-                return days
+                val scheduleDates = days
+                    .filter { it >= startDateForPeriod.dayOfWeek }
                     .map { startDateForPeriod.with(TemporalAdjusters.nextOrSame(it)) }
+                return scheduleDates
             }
         }
 
