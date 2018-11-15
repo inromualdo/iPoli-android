@@ -1,9 +1,6 @@
 package io.ipoli.android.repeatingquest.entity
 
-import io.ipoli.android.common.datetime.datesBetween
-import io.ipoli.android.common.datetime.daysUntil
-import io.ipoli.android.common.datetime.isBeforeOrEqual
-import io.ipoli.android.common.datetime.isBetween
+import io.ipoli.android.common.datetime.*
 import org.threeten.bp.DayOfWeek
 import org.threeten.bp.LocalDate
 import org.threeten.bp.Month
@@ -23,7 +20,28 @@ sealed class RepeatPattern {
     abstract val scheduleAheadPeriods: Int
 
     abstract fun periodRangeFor(date: LocalDate): PeriodRange
-    abstract fun datesToScheduleOn(currentDate: LocalDate): List<LocalDate>
+
+    fun createSchedule(
+        currentDate: LocalDate,
+        lastDate: LocalDate?
+    ): Schedule {
+        val s = doCreateSchedule(currentDate)
+
+        return s.copy(
+            dates = s.dates.filter { date ->
+                lastDate?.let {
+                    date.isBeforeOrEqual(lastDate)
+                } ?: true
+            },
+            newRepeatPattern = s.newRepeatPattern
+        )
+    }
+
+    abstract fun doCreateSchedule(
+        currentDate: LocalDate
+    ): Schedule
+
+    data class Schedule(val dates: List<LocalDate>, val newRepeatPattern: RepeatPattern)
 
     data class Daily(
         override val startDate: LocalDate = LocalDate.now(),
@@ -45,20 +63,29 @@ sealed class RepeatPattern {
         private fun shouldBeDoneOn(date: LocalDate) =
             startDate.daysUntil(date) % skipEveryXPeriods == 0L
 
-        override fun datesToScheduleOn(currentDate: LocalDate) =
-            datesForPeriod(currentDate) + datesForPeriod(currentDate.plusWeeks(1))
+        override fun doCreateSchedule(currentDate: LocalDate): Schedule {
+            val nextMonday = currentDate.plusWeeks(1).with(
+                TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)
+            )
+            return Schedule(
+                dates = datesForPeriod(currentDate) + datesForPeriod(nextMonday),
+                newRepeatPattern = copy(
+                    lastScheduledPeriodStart = nextMonday
+                )
+            )
+        }
 
         private fun datesForPeriod(
-            dateInPeriod: LocalDate
+            startDateForPeriod: LocalDate
         ): List<LocalDate> {
-            val period = periodRangeFor(dateInPeriod)
+            val period = periodRangeFor(startDateForPeriod)
             if (lastScheduledPeriodStart != null && period.start.isBeforeOrEqual(
                     lastScheduledPeriodStart
                 )
             ) {
                 return emptyList()
             }
-            return dateInPeriod.datesBetween(period.end).filter { shouldBeDoneOn(it) }
+            return startDateForPeriod.datesBetween(period.end).filter { shouldBeDoneOn(it) }
         }
     }
 
@@ -80,8 +107,13 @@ sealed class RepeatPattern {
                 end = date.with(TemporalAdjusters.lastDayOfYear())
             )
 
-        override fun datesToScheduleOn(currentDate: LocalDate) =
-            datesForPeriod(currentDate) + datesForPeriod(currentDate.plusYears(1))
+        override fun doCreateSchedule(currentDate: LocalDate): Schedule {
+            val firstOfNextYear = currentDate.plusYears(1)
+            return Schedule(
+                dates = datesForPeriod(currentDate) + datesForPeriod(firstOfNextYear),
+                newRepeatPattern = copy(lastScheduledPeriodStart = firstOfNextYear)
+            )
+        }
 
         private fun datesForPeriod(
             dateInPeriod: LocalDate
@@ -104,13 +136,42 @@ sealed class RepeatPattern {
         override val lastScheduledPeriodStart: LocalDate?,
         override val skipEveryXPeriods: Int
     ) : RepeatPattern() {
+
+        override val scheduleAheadPeriods: Int = 1
+        override val periodCount get() = daysOfWeek.size
+
         override fun periodRangeFor(date: LocalDate) =
             PeriodRange(
                 start = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
                 end = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
             )
 
-        override val periodCount get() = daysOfWeek.size
+        override fun doCreateSchedule(currentDate: LocalDate): Schedule {
+            val nextMonday = currentDate.plusWeeks(1).with(
+                TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)
+            )
+            return Schedule(
+                dates = datesForPeriod(currentDate) + datesForPeriod(nextMonday),
+                newRepeatPattern = copy(lastScheduledPeriodStart = nextMonday)
+            )
+        }
+
+        private fun shouldDoOn(date: LocalDate) = daysOfWeek.contains(date.dayOfWeek)
+
+        private fun datesForPeriod(startDateForPeriod: LocalDate): List<LocalDate> {
+            val period = periodRangeFor(startDateForPeriod)
+            val weeksPassed = periodRangeFor(startDate).start.weeksUntil(startDateForPeriod)
+            val doEveryXWeeks = skipEveryXPeriods + 1
+
+            val shouldDoOnWeek = weeksPassed % doEveryXWeeks == 0L
+            if (!shouldDoOnWeek ||
+                (lastScheduledPeriodStart != null &&
+                    period.start.isBeforeOrEqual(lastScheduledPeriodStart))) {
+                return emptyList()
+            }
+            return startDateForPeriod.datesBetween(period.end)
+                .filter { shouldDoOn(it) }
+        }
     }
 
     data class Monthly(
@@ -121,13 +182,42 @@ sealed class RepeatPattern {
         override val skipEveryXPeriods: Int
     ) : RepeatPattern() {
 
+        override val scheduleAheadPeriods: Int = 1
+
+        override val periodCount get() = daysOfMonth.size
+
         override fun periodRangeFor(date: LocalDate) =
             PeriodRange(
                 start = date.with(TemporalAdjusters.firstDayOfMonth()),
                 end = date.with(TemporalAdjusters.lastDayOfMonth())
             )
 
-        override val periodCount get() = daysOfMonth.size
+        override fun doCreateSchedule(currentDate: LocalDate): Schedule {
+            val nextFirstDayOfMonth = currentDate.plusMonths(1).with(
+                TemporalAdjusters.firstDayOfMonth()
+            )
+            return Schedule(
+                dates = datesForPeriod(currentDate) + datesForPeriod(nextFirstDayOfMonth),
+                newRepeatPattern = copy(lastScheduledPeriodStart = nextFirstDayOfMonth)
+            )
+        }
+
+        private fun shouldDoOn(date: LocalDate) = daysOfMonth.contains(date.dayOfMonth)
+
+        private fun datesForPeriod(startDateForPeriod: LocalDate): List<LocalDate> {
+            val period = periodRangeFor(startDateForPeriod)
+            val doEveryXMonths = skipEveryXPeriods + 1
+            val monthsPassed = periodRangeFor(startDate).start.monthsUntil(startDateForPeriod)
+            val shouldDoOnMonth = monthsPassed % doEveryXMonths == 0L
+
+            if (!shouldDoOnMonth ||
+                (lastScheduledPeriodStart != null &&
+                    period.start.isBeforeOrEqual(lastScheduledPeriodStart))) {
+                return emptyList()
+            }
+            return startDateForPeriod.datesBetween(period.end)
+                .filter { shouldDoOn(it) }
+        }
     }
 
     sealed class Flexible : RepeatPattern() {
@@ -141,6 +231,8 @@ sealed class RepeatPattern {
             override val skipEveryXPeriods: Int
         ) : Flexible() {
 
+            override val scheduleAheadPeriods = 1
+
             override fun periodRangeFor(date: LocalDate) =
                 PeriodRange(
                     start = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
@@ -148,6 +240,46 @@ sealed class RepeatPattern {
                 )
 
             override val periodCount get() = timesPerWeek
+
+            override fun doCreateSchedule(currentDate: LocalDate): Schedule {
+                val nextMonday = currentDate.plusWeeks(1).with(
+                    TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)
+                )
+                return Schedule(
+                    dates = datesForPeriod(currentDate) +
+                        datesForPeriod(nextMonday),
+                    newRepeatPattern = copy(lastScheduledPeriodStart = nextMonday)
+                )
+            }
+
+            private fun datesForPeriod(
+                startDateForPeriod: LocalDate
+            ): List<LocalDate> {
+                val weeksPassed = periodRangeFor(startDate).start.weeksUntil(startDateForPeriod)
+                val doEveryXWeeks = skipEveryXPeriods + 1
+
+                val shouldDoOnWeek = weeksPassed % doEveryXWeeks == 0L
+                if (!shouldDoOnWeek ||
+                    (lastScheduledPeriodStart != null &&
+                        periodRangeFor(startDateForPeriod).start.isBeforeOrEqual(
+                            lastScheduledPeriodStart
+                        ))) {
+                    return emptyList()
+                }
+
+                val daysOfWeek = DayOfWeek.values().toList()
+                val days = if (preferredDays.isNotEmpty()) {
+                    val scheduledWeekDays = preferredDays.shuffled().take(timesPerWeek)
+                    val remainingWeekDays =
+                        (daysOfWeek - scheduledWeekDays).shuffled()
+                            .take(timesPerWeek - scheduledWeekDays.size)
+                    scheduledWeekDays + remainingWeekDays
+                } else {
+                    daysOfWeek.shuffled().take(timesPerWeek)
+                }
+                return days
+                    .map { startDateForPeriod.with(TemporalAdjusters.nextOrSame(it)) }
+            }
         }
 
         data class Monthly(
@@ -158,6 +290,9 @@ sealed class RepeatPattern {
             override val lastScheduledPeriodStart: LocalDate? = null,
             override val skipEveryXPeriods: Int
         ) : Flexible() {
+
+            override val scheduleAheadPeriods = 1
+
             override fun periodRangeFor(date: LocalDate) =
                 PeriodRange(
                     start = date.with(TemporalAdjusters.firstDayOfMonth()),
@@ -165,123 +300,56 @@ sealed class RepeatPattern {
                 )
 
             override val periodCount get() = timesPerMonth
+
+            override fun doCreateSchedule(
+                currentDate: LocalDate
+            ): Schedule {
+                val nextFirstDayOfMonth = currentDate.plusMonths(1).with(
+                    TemporalAdjusters.firstDayOfMonth()
+                )
+                return Schedule(
+                    dates = datesForPeriod(currentDate) + datesForPeriod(nextFirstDayOfMonth),
+                    newRepeatPattern = copy(lastScheduledPeriodStart = nextFirstDayOfMonth)
+                )
+            }
+
+            private fun datesForPeriod(
+                startDateForPeriod: LocalDate
+            ): List<LocalDate> {
+                val period = periodRangeFor(startDateForPeriod)
+                val doEveryXMonths = skipEveryXPeriods + 1
+                val monthsPassed = periodRangeFor(startDate).start.monthsUntil(startDateForPeriod)
+                val shouldDoOnMonth = monthsPassed % doEveryXMonths == 0L
+
+                if (!shouldDoOnMonth ||
+                    (lastScheduledPeriodStart != null &&
+                        period.start.isBeforeOrEqual(lastScheduledPeriodStart))) {
+                    return emptyList()
+                }
+                val daysOfMonth =
+                    (1..period.start.lengthOfMonth()).map { it }.shuffled().take(timesPerMonth)
+
+                val days = if (preferredDays.isNotEmpty()) {
+                    val scheduledMonthDays = preferredDays.shuffled().take(timesPerMonth)
+                    val remainingMonthDays =
+                        (daysOfMonth - scheduledMonthDays).shuffled()
+                            .take(timesPerMonth - scheduledMonthDays.size)
+                    scheduledMonthDays + remainingMonthDays
+                } else {
+                    daysOfMonth.shuffled().take(timesPerMonth)
+                }
+
+                return days
+                    .map { startDateForPeriod.withDayOfMonth(it) }
+            }
         }
     }
 
-
-    companion object {
-        fun findWeeklyPeriods(
-            start: LocalDate,
-            end: LocalDate
-        ): List<Period> {
-
-            val periods = mutableListOf<Period>()
-            val firstDayOfWeek = DayOfWeek.MONDAY
-
-            var periodStart = start.with(TemporalAdjusters.previousOrSame(firstDayOfWeek))
-            val dayAfterEnd = end.plusDays(1)
-            while (periodStart.isBefore(dayAfterEnd)) {
-                val periodEnd = periodStart.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
-                periods.add(Period(periodStart, periodEnd))
-                periodStart = periodEnd.plusDays(1)
-            }
-
-            return periods
-        }
-
-        fun findMonthlyPeriods(
-            start: LocalDate,
-            end: LocalDate
-        ): List<Period> {
-            val periods = mutableListOf<Period>()
-
-            var periodStart = start.with(TemporalAdjusters.firstDayOfMonth())
-            val dayAfterEnd = end.plusDays(1)
-            while (periodStart.isBefore(dayAfterEnd)) {
-                val periodEnd = periodStart.with(TemporalAdjusters.lastDayOfMonth())
-                periods.add(Period(periodStart, periodEnd))
-                periodStart = periodEnd.plusDays(1)
-            }
-
-            return periods
-        }
-
-        fun monthlyDatesToScheduleInPeriod(
-            repeatPattern: RepeatPattern.Monthly,
-            start: LocalDate,
-            end: LocalDate
-        ): List<LocalDate> {
-
-            var date = start
-            val dates = mutableListOf<LocalDate>()
-            while (date.isBefore(end.plusDays(1))) {
-                if (date.dayOfMonth in repeatPattern.daysOfMonth) {
-                    dates.add(date)
-                }
-                date = date.plusDays(1)
-            }
-            return dates
-
-        }
-
-        fun weeklyDatesToScheduleInPeriod(
-            repeatPattern: RepeatPattern.Weekly,
-            start: LocalDate,
-            end: LocalDate
-        ): List<LocalDate> {
-
-            var date = start
-            val dates = mutableListOf<LocalDate>()
-            while (date.isBefore(end.plusDays(1))) {
-                if (date.dayOfWeek in repeatPattern.daysOfWeek) {
-                    dates.add(date)
-                }
-                date = date.plusDays(1)
-            }
-            return dates
-
-        }
-
-        fun yearlyDatesToScheduleInPeriod(
-            repeatPattern: RepeatPattern.Yearly,
-            start: LocalDate,
-            end: LocalDate
-        ): List<LocalDate> {
-            if (start.year == end.year) {
-                val date = LocalDate.of(
-                    start.year,
-                    repeatPattern.month,
-                    repeatPattern.dayOfMonth
-                )
-                return listOf(date).filter { it.isBetween(start, end) }
-            }
-
-            var startPeriodDate = start
-            val dates = mutableListOf<LocalDate>()
-            while (startPeriodDate <= end) {
-                val lastDayOfYear = LocalDate.of(startPeriodDate.year, 12, 31)
-                val date = LocalDate.of(
-                    startPeriodDate.year,
-                    repeatPattern.month,
-                    repeatPattern.dayOfMonth
-                )
-                val endPeriodDate = if (end.isBefore(lastDayOfYear)) end else lastDayOfYear
-                if (date.isBetween(startPeriodDate, endPeriodDate)) {
-                    dates.add(date)
-                }
-                startPeriodDate = LocalDate.of(startPeriodDate.year + 1, 1, 1)
-            }
-            return dates
-
-        }
-    }
 }
 
 data class PeriodRange(val start: LocalDate, val end: LocalDate)
 
 data class PeriodProgress(val completedCount: Int, val allCount: Int)
-
-data class Period(val start: LocalDate, val end: LocalDate)
 
 enum class RepeatType {
     DAILY,
