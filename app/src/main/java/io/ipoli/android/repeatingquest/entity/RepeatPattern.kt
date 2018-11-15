@@ -5,6 +5,7 @@ import org.threeten.bp.DayOfWeek
 import org.threeten.bp.LocalDate
 import org.threeten.bp.Month
 import org.threeten.bp.temporal.TemporalAdjusters
+import timber.log.Timber
 
 /**
  * Created by Venelin Valkov <venelin@mypoli.fun>
@@ -26,8 +27,10 @@ sealed class RepeatPattern {
     ): Schedule {
         val s = doCreateSchedule(currentDate)
 
+        val dates = s.dates
+        Timber.d("AAA dates $dates")
         return s.copy(
-            dates = s.dates.filter { date ->
+            dates = dates.filter { date ->
                 lastDate?.let {
                     date.isBeforeOrEqual(lastDate)
                 } ?: true
