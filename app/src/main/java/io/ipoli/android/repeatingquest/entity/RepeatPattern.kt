@@ -126,7 +126,25 @@ sealed class RepeatPattern {
         override fun createPlaceholderDates(
             startDate: LocalDate,
             endDate: LocalDate
-        ) = emptyList<LocalDate>()
+        ): List<LocalDate> {
+            var periodStart = periodRangeFor(startDate).start
+            lastScheduledPeriodStart?.let {
+                while (periodStart.isBeforeOrEqual(lastScheduledPeriodStart)) {
+                    periodStart = periodStart.plusYears(1)
+                }
+            }
+            if (periodStart.isBefore(startDate)) {
+                periodStart = startDate
+            }
+
+            val dates = mutableListOf<LocalDate>()
+            while(periodStart.isBeforeOrEqual(endDate)) {
+                dates.add(LocalDate.of(periodStart.year, month, dayOfMonth))
+                periodStart = periodStart.plusYears(1)
+            }
+
+            return dates
+        }
 
         override fun periodRangeFor(date: LocalDate) =
             PeriodRange(
@@ -169,7 +187,18 @@ sealed class RepeatPattern {
         override fun createPlaceholderDates(
             startDate: LocalDate,
             endDate: LocalDate
-        ) = emptyList<LocalDate>()
+        ): List<LocalDate> {
+            var periodStart = periodRangeFor(startDate).start
+            lastScheduledPeriodStart?.let {
+                while (periodStart.isBeforeOrEqual(lastScheduledPeriodStart)) {
+                    periodStart = periodStart.plusWeeks(1)
+                }
+            }
+            if (periodStart.isBefore(startDate)) {
+                periodStart = startDate
+            }
+            return periodStart.datesBetween(endDate).filter { shouldDoOn(it) }
+        }
 
         override fun periodRangeFor(date: LocalDate) =
             PeriodRange(
