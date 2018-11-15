@@ -95,12 +95,15 @@ class RepeatPatternSpek : Spek({
                     shouldHaveNextDate(pattern.nextDate(today), today.plusWeeks(1).plusDays(5))
                 }
 
-                it("should find date considering and not skip week") {
+                it("should find date and not skip week") {
                     val today =
                         DateUtils.today.with(TemporalAdjusters.previousOrSame(DayOfWeek.WEDNESDAY))
                     val pattern =
                         RepeatPattern.Weekly(setOf(DayOfWeek.MONDAY), today, skipEveryXWeeks = 1)
-                    shouldHaveNextDate(pattern.nextDate(today.plusWeeks(1).plusDays(5)), today.plusWeeks(1).plusDays(5))
+                    shouldHaveNextDate(
+                        pattern.nextDate(today.plusWeeks(1).plusDays(5)),
+                        today.plusWeeks(1).plusDays(5)
+                    )
                 }
             }
 
@@ -225,13 +228,13 @@ class RepeatPatternSpek : Spek({
                     shouldHaveNextDate(pattern.nextDate(today), first.plusMonths(2))
                 }
 
-//                it("should find date considering and not skip week") {
-//                    val today =
-//                        DateUtils.today.with(TemporalAdjusters.previousOrSame(DayOfWeek.WEDNESDAY))
-//                    val pattern =
-//                        RepeatPattern.Weekly(setOf(DayOfWeek.MONDAY), today, skipEveryXWeeks = 1)
-//                    shouldHaveNextDate(pattern.nextDate(today.plusWeeks(1).plusDays(5)), today.plusWeeks(1).plusDays(5))
-//                }
+                it("should find date and not skip month") {
+                    val today = DateUtils.today.withDayOfMonth(10)
+                    val first = today.withDayOfMonth(1)
+                    val pattern =
+                        RepeatPattern.Monthly(setOf(1), first, skipEveryXMonths = 1)
+                    shouldHaveNextDate(pattern.nextDate(first.plusMonths(2)), first.plusMonths(2))
+                }
             }
 
             describe("Flexible") {
