@@ -1281,4 +1281,5 @@ These are your physical and mental characteristics.\n\n
     <string name="add_reminder">Add Reminder</string>
     <string name="remind_me_at">Remind me at</string>
     <string name="edit_habit_max_reminders_hint">Maximum number of Reminders reached. You can set a Reminder for each time you do the Habit per day.</string>
+    <string name="not_done_yet">Not done yet</string>
 </resources>

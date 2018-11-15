@@ -356,6 +356,7 @@ interface UseCaseModule {
     val createAgendaItemsUseCase: CreateAgendaItemsUseCase
     val saveRepeatingQuestUseCase: SaveRepeatingQuestUseCase
     val findNextDateForRepeatingQuestUseCase: FindNextDateForRepeatingQuestUseCase
+    val findLastCompletedDateForRepeatingQuestUseCase: FindLastCompletedDateForRepeatingQuestUseCase
     val findPeriodProgressForRepeatingQuestUseCase: FindPeriodProgressForRepeatingQuestUseCase
     val saveQuestsForRepeatingQuestUseCase: SaveQuestsForRepeatingQuestUseCase
     val removeRepeatingQuestUseCase: RemoveRepeatingQuestUseCase
@@ -712,6 +713,9 @@ class MainUseCaseModule(private val context: Context) : UseCaseModule {
         get() = FindNextDateForRepeatingQuestUseCase(
             questRepository
         )
+
+    override val findLastCompletedDateForRepeatingQuestUseCase
+        get() = FindLastCompletedDateForRepeatingQuestUseCase(questRepository)
 
     override val findPeriodProgressForRepeatingQuestUseCase
         get() = FindPeriodProgressForRepeatingQuestUseCase(

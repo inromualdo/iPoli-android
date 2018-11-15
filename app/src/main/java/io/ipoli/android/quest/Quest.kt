@@ -308,6 +308,7 @@ data class RepeatingQuest(
     val repeatPattern: RepeatPattern,
     val subQuests: List<SubQuest> = listOf(),
     val nextDate: LocalDate? = null,
+    val lastCompletedDate: LocalDate? = null,
     val periodProgress: PeriodProgress? = null,
     val challengeId: String? = null,
     val note: String = "",

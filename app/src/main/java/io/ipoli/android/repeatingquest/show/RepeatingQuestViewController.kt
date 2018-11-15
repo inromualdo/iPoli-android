@@ -11,7 +11,6 @@ import android.view.*
 import io.ipoli.android.MainActivity
 import io.ipoli.android.R
 import io.ipoli.android.common.ViewUtils
-import io.ipoli.android.common.datetime.Time
 import io.ipoli.android.common.redux.android.ReduxViewController
 import io.ipoli.android.common.text.DateFormatter
 import io.ipoli.android.common.text.DurationFormatter
@@ -49,14 +48,9 @@ class RepeatingQuestViewController(args: Bundle? = null) :
     ): View {
         setHasOptionsMenu(true)
         applyStatusBarColors = false
-        val view = inflater.inflate(
-            R.layout.controller_repeating_quest,
-            container,
-            false
-        )
+        val view = container.inflate(R.layout.controller_repeating_quest)
         setToolbar(view.toolbar)
-        val collapsingToolbar = view.collapsingToolbarContainer
-        collapsingToolbar.isTitleEnabled = false
+        view.collapsingToolbarContainer.isTitleEnabled = false
 
         view.appbar.addOnOffsetChangedListener(object : AppBarStateChangeListener() {
             override fun onStateChanged(appBarLayout: AppBarLayout, state: State) {
@@ -207,7 +201,9 @@ class RepeatingQuestViewController(args: Bundle? = null) :
         state: RepeatingQuestViewState,
         view: View
     ) {
-        view.nextText.text = state.nextScheduledDateText
+        view.rqLastComplete.text = state.lastCompletedDateText
+        view.rqNextDate.text = state.nextScheduledDateText
+        view.rqScheduledTime.text = state.scheduledTimeText
     }
 
     private fun renderName(
@@ -297,37 +293,33 @@ class RepeatingQuestViewController(args: Bundle? = null) :
             }
         }
 
-    private val RepeatingQuestViewState.timeSpentText
-        get() = Time.of(totalDuration.intValue).toString(shouldUse24HourFormat)
+    private val RepeatingQuestViewState.lastCompletedDateText
+        get() = when {
+            lastCompletedDate != null -> {
+                DateFormatter.format(view!!.context, lastCompletedDate)
+            }
+            else -> stringRes(R.string.not_done_yet)
+        }
+
 
     private val RepeatingQuestViewState.nextScheduledDateText
         get() = when {
             isCompleted -> stringRes(R.string.completed)
             nextScheduledDate != null -> {
-                var res = stringRes(
-                    R.string.repeating_quest_next,
-                    DateFormatter.format(view!!.context, nextScheduledDate)
-                )
-                res += if (startTime != null) {
-                    " ${startTime.toString(shouldUse24HourFormat)} - ${endTime!!.toString(
-                        shouldUse24HourFormat
-                    )}"
-                } else {
-                    " " + stringRes(
-                        R.string.for_time,
-                        DurationFormatter.formatShort(view!!.context, duration)
-                    )
-                }
-                res
+                DateFormatter.format(view!!.context, nextScheduledDate)
             }
-            else -> stringRes(
-                R.string.repeating_quest_next,
-                stringRes(R.string.unscheduled)
-            )
+            else -> stringRes(R.string.unscheduled)
         }
 
+    private val RepeatingQuestViewState.scheduledTimeText: String
+        get() = if (startTime != null) {
+            "${startTime.toString(shouldUse24HourFormat)} - ${endTime!!.toString(
+                shouldUse24HourFormat
+            )}"
+        } else stringRes(R.string.for_time, DurationFormatter.formatShort(view!!.context, duration))
+
     private val RepeatingQuestViewState.frequencyText
-        get() = when (repeat) {
+        get () = when (repeat) {
             RepeatingQuestViewState.RepeatType.Daily -> {
                 "Every day"
             }

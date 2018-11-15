@@ -226,8 +226,7 @@ class HomeViewController(args: Bundle? = null) :
         val childRouter = getChildRouter(view.childControllerContainer, null)
         if (!childRouter.hasRootController()) {
             childRouter.setRoot(
-//                RouterTransaction.with(TodayViewController())
-                RouterTransaction.with(RepeatingQuestListViewController())
+                RouterTransaction.with(TodayViewController())
             )
         }
     }
