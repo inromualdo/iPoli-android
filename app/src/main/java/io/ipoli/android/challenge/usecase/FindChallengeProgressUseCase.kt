@@ -7,6 +7,7 @@ import io.ipoli.android.common.datetime.Time
 import io.ipoli.android.common.datetime.datesBetween
 import io.ipoli.android.common.datetime.isBetween
 import io.ipoli.android.quest.Quest
+import io.ipoli.android.quest.data.persistence.QuestRepository
 import org.threeten.bp.DayOfWeek
 import org.threeten.bp.LocalDate
 
@@ -14,7 +15,8 @@ import org.threeten.bp.LocalDate
  * Created by Polina Zhelyazkova <polina@mypoli.fun>
  * on 3/13/18.
  */
-class FindChallengeProgressUseCase : UseCase<FindChallengeProgressUseCase.Params, Challenge> {
+class FindChallengeProgressUseCase(private val questRepository: QuestRepository) :
+    UseCase<FindChallengeProgressUseCase.Params, Challenge> {
     override fun execute(parameters: Params): Challenge {
         val challenge = parameters.challenge
 
@@ -23,55 +25,11 @@ class FindChallengeProgressUseCase : UseCase<FindChallengeProgressUseCase.Params
             val start = rq.start
             val end =
                 if (rqEnd == null) challenge.endDate else DateUtils.min(rqEnd, challenge.endDate)
-            val repeatingPattern = rq.repeatPattern
 
             val removedCount =
                 challenge.quests.filter { it.repeatingQuestId == rq.id && it.isRemoved }.size
 
-            val allCount = 0
-//            when (repeatingPattern) {
-//                is RepeatPattern.Daily -> {
-//                    start.daysUntil(end).toInt() + 1
-//                }
-//
-//                is RepeatPattern.Weekly -> {
-//                    weeklyDatesToScheduleInPeriod(repeatingPattern, start, end).size
-//                }
-//
-//                is RepeatPattern.Monthly -> {
-//                    monthlyDatesToScheduleInPeriod(repeatingPattern, start, end).size
-//                }
-//
-//                is RepeatPattern.Yearly -> {
-//                    yearlyDatesToScheduleInPeriod(repeatingPattern, start, end).size
-//                }
-//
-//                is RepeatPattern.EveryXDays -> {
-//                    everyXDatesToScheduleInPeriod(repeatingPattern, start, end).size
-//                }
-//
-//                is RepeatPattern.Flexible.Weekly -> {
-//                    val periods = findWeeklyPeriods(start, end)
-//                    periods.sumBy {
-//                        if (repeatingPattern.scheduledPeriods.containsKey(it.start)) {
-//                            repeatingPattern.scheduledPeriods[it.start]!!.size
-//                        } else {
-//                            repeatingPattern.timesPerWeek
-//                        }
-//                    }
-//                }
-//
-//                is RepeatPattern.Flexible.Monthly -> {
-//                    val periods = findMonthlyPeriods(start, end)
-//                    periods.sumBy {
-//                        if (repeatingPattern.scheduledPeriods.containsKey(it.start)) {
-//                            repeatingPattern.scheduledPeriods[it.start]!!.size
-//                        } else {
-//                            repeatingPattern.timesPerMonth
-//                        }
-//                    }
-//                }
-//            }
+            val allCount = questRepository.findCountForRepeatingQuestInPeriod(rq.id, start, end)
 
             allCount - removedCount
         }

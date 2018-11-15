@@ -61,7 +61,7 @@ class CreateRepeatingQuestHistoryUseCaseSpek : Spek({
             val date = LocalDate.now()
             val questRepoMock = mock<QuestRepository> {
                 on {
-                    findCompletedForRepeatingQuestInPeriod(
+                    findScheduledForRepeatingQuestInPeriod(
                         any(),
                         any(),
                         any()
@@ -84,7 +84,7 @@ class CreateRepeatingQuestHistoryUseCaseSpek : Spek({
             val date = LocalDate.now().minusDays(1)
             val questRepoMock = mock<QuestRepository> {
                 on {
-                    findCompletedForRepeatingQuestInPeriod(
+                    findScheduledForRepeatingQuestInPeriod(
                         any(),
                         any(),
                         any()
@@ -106,7 +106,7 @@ class CreateRepeatingQuestHistoryUseCaseSpek : Spek({
             val date = LocalDate.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.WEDNESDAY))
             val questRepoMock = mock<QuestRepository> {
                 on {
-                    findCompletedForRepeatingQuestInPeriod(
+                    findScheduledForRepeatingQuestInPeriod(
                         any(),
                         any(),
                         any()
@@ -128,7 +128,7 @@ class CreateRepeatingQuestHistoryUseCaseSpek : Spek({
             val date = LocalDate.now().with(DayOfWeek.TUESDAY)
             val questRepoMock = mock<QuestRepository> {
                 on {
-                    findCompletedForRepeatingQuestInPeriod(
+                    findScheduledForRepeatingQuestInPeriod(
                         any(),
                         any(),
                         any()
@@ -152,7 +152,7 @@ class CreateRepeatingQuestHistoryUseCaseSpek : Spek({
             val tomorrow = LocalDate.now().plusDays(1)
             val questRepoMock = mock<QuestRepository> {
                 on {
-                    findCompletedForRepeatingQuestInPeriod(
+                    findScheduledForRepeatingQuestInPeriod(
                         any(),
                         any(),
                         any()
@@ -176,7 +176,7 @@ class CreateRepeatingQuestHistoryUseCaseSpek : Spek({
             val tomorrow = LocalDate.now().plusDays(1)
             val questRepoMock = mock<QuestRepository> {
                 on {
-                    findCompletedForRepeatingQuestInPeriod(
+                    findScheduledForRepeatingQuestInPeriod(
                         any(),
                         any(),
                         any()

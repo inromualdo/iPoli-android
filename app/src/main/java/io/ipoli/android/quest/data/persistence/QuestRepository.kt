@@ -84,7 +84,7 @@ interface QuestRepository : CollectionRepository<Quest> {
         end: LocalDate?
     ): Int
 
-    fun findCompletedForRepeatingQuestInPeriod(
+    fun findScheduledForRepeatingQuestInPeriod(
         repeatingQuestId: String,
         start: LocalDate,
         end: LocalDate? = null
@@ -137,6 +137,12 @@ interface QuestRepository : CollectionRepository<Quest> {
         startDate: LocalDate,
         endDate: LocalDate
     ): List<Quest>
+
+    fun findCountForRepeatingQuestInPeriod(
+        repeatingQuestId: String,
+        start: LocalDate,
+        end: LocalDate
+    ): Int
 }
 
 @Dao
@@ -273,14 +279,21 @@ abstract class QuestDao : BaseDao<RoomQuest>() {
         endDate: Long
     ): Int
 
-    @Query("SELECT * FROM quests WHERE repeatingQuestId = :repeatingQuestId AND completedAtDate >= :startDate")
-    abstract fun findCompletedForRepeatingQuestAfter(
+    @Query("SELECT COUNT(*) FROM quests WHERE repeatingQuestId = :repeatingQuestId AND scheduledDate >= :startDate AND scheduledDate <= :endDate")
+    abstract fun findCountForRepeatingQuestInPeriod(
+        repeatingQuestId: String,
+        startDate: Long,
+        endDate: Long
+    ): Int
+
+    @Query("SELECT * FROM quests WHERE repeatingQuestId = :repeatingQuestId AND scheduledDate >= :startDate AND removedAt IS NULL")
+    abstract fun findScheduledForRepeatingQuestAfter(
         repeatingQuestId: String,
         startDate: Long
     ): List<RoomQuest>
 
-    @Query("SELECT * FROM quests WHERE repeatingQuestId = :repeatingQuestId AND completedAtDate >= :startDate AND completedAtDate <= :endDate")
-    abstract fun findCompletedForRepeatingQuestInPeriod(
+    @Query("SELECT * FROM quests WHERE repeatingQuestId = :repeatingQuestId AND scheduledDate >= :startDate AND scheduledDate <= :endDate AND removedAt IS NULL")
+    abstract fun findScheduledForRepeatingQuestInPeriod(
         repeatingQuestId: String,
         startDate: Long,
         endDate: Long
@@ -559,15 +572,25 @@ class RoomQuestRepository(
             )
         }
 
-    override fun findCompletedForRepeatingQuestInPeriod(
+    override fun findCountForRepeatingQuestInPeriod(
+        repeatingQuestId: String,
+        start: LocalDate,
+        end: LocalDate
+    ) = dao.findCountForRepeatingQuestInPeriod(
+        repeatingQuestId,
+        start.startOfDayUTC(),
+        end.startOfDayUTC()
+    )
+
+    override fun findScheduledForRepeatingQuestInPeriod(
         repeatingQuestId: String,
         start: LocalDate,
         end: LocalDate?
     ) =
         if (end == null) {
-            dao.findCompletedForRepeatingQuestAfter(repeatingQuestId, start.startOfDayUTC())
+            dao.findScheduledForRepeatingQuestAfter(repeatingQuestId, start.startOfDayUTC())
         } else {
-            dao.findCompletedForRepeatingQuestInPeriod(
+            dao.findScheduledForRepeatingQuestInPeriod(
                 repeatingQuestId,
                 start.startOfDayUTC(),
                 end.startOfDayUTC()
