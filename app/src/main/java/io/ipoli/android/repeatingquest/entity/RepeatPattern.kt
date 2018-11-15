@@ -313,10 +313,9 @@ sealed class RepeatPattern {
                 } else {
                     daysOfWeek.shuffled().take(timesPerWeek)
                 }
-                val scheduleDates = days
+                return days
                     .filter { it >= startDateForPeriod.dayOfWeek }
                     .map { startDateForPeriod.with(TemporalAdjusters.nextOrSame(it)) }
-                return scheduleDates
             }
         }
 
@@ -372,16 +371,13 @@ sealed class RepeatPattern {
                     (1..period.start.lengthOfMonth()).map { it }.shuffled().take(timesPerMonth)
 
                 val days = if (preferredDays.isNotEmpty()) {
-                    val scheduledMonthDays = preferredDays.shuffled().take(timesPerMonth)
-                    val remainingMonthDays =
-                        (daysOfMonth - scheduledMonthDays).shuffled()
-                            .take(timesPerMonth - scheduledMonthDays.size)
-                    scheduledMonthDays + remainingMonthDays
+                    preferredDays.shuffled().take(timesPerMonth)
                 } else {
                     daysOfMonth.shuffled().take(timesPerMonth)
                 }
 
                 return days
+                    .filter { it >= startDateForPeriod.dayOfMonth }
                     .map { startDateForPeriod.withDayOfMonth(it) }
             }
         }
