@@ -9,6 +9,7 @@ import io.ipoli.android.challenge.entity.SharingPreference
 import io.ipoli.android.challenge.persistence.ChallengeDao
 import io.ipoli.android.challenge.persistence.DbTrackedValue
 import io.ipoli.android.challenge.persistence.RoomChallenge
+import io.ipoli.android.common.datetime.startOfDayUTC
 import io.ipoli.android.dailychallenge.data.persistence.DailyChallengeDao
 import io.ipoli.android.dailychallenge.data.persistence.RoomDailyChallenge
 import io.ipoli.android.habit.persistence.HabitDao
@@ -28,6 +29,7 @@ import io.ipoli.android.tag.persistence.RoomTag
 import io.ipoli.android.tag.persistence.TagDao
 import org.json.JSONArray
 import org.json.JSONObject
+import org.threeten.bp.LocalDate
 import java.util.*
 
 
@@ -504,6 +506,25 @@ object Migration9To10 : Migration(9, 10) {
     }
 }
 
+object Migration10To11 : Migration(10, 11) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE repeating_quests ADD COLUMN `repeatPattern_skipEveryXPeriods` INTEGER NOT NULL DEFAULT 0")
+        database.execSQL("ALTER TABLE repeating_quests ADD COLUMN `repeatPattern_lastScheduledPeriodStart` INTEGER DEFAULT NULL")
+        database.execSQL("UPDATE repeating_quests SET repeatPattern_skipEveryXPeriods = repeatPattern_xDays WHERE repeatPattern_xDays IS NOT NULL")
+
+        val currentTimeMillis: Long = System.currentTimeMillis()
+        val currentDate = LocalDate.now().startOfDayUTC()
+
+        database.execSQL(
+            """
+            UPDATE quests
+            SET removedAt = $currentTimeMillis, updatedAt = $currentTimeMillis
+            WHERE repeatingQuestId IS NOT NULL AND completedAtDate IS NULL AND scheduledAtDate > $currentDate
+            """
+        )
+    }
+}
+
 @Database(
     entities = [
         RoomPlayer::class,
@@ -519,7 +540,7 @@ object Migration9To10 : Migration(9, 10) {
         RoomHabit.Companion.RoomTagJoin::class,
         RoomEntityReminder::class
     ],
-    version = 10,
+    version = 11,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -566,7 +587,8 @@ abstract class MyPoliRoomDatabase : RoomDatabase() {
                     Migration6To7,
                     Migration7To8,
                     Migration8To9,
-                    Migration9To10
+                    Migration9To10,
+                    Migration10To11
                 )
                 .addCallback(CALLBACK)
                 .build()

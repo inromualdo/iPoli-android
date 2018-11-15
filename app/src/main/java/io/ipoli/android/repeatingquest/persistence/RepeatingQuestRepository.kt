@@ -561,7 +561,7 @@ class FirestoreRepeatingQuestRepository(
                 }
 
             },
-            repeatPattern = createRepeatPattern(DbRepeatPattern(rq.repeatPattern)),
+            repeatPattern = createRepeatPattern(createDbRepeatPattern(rq)),
             subQuests = rq.subQuests.map {
                 val dsq = DbSubQuest(it)
                 SubQuest(
@@ -576,6 +576,23 @@ class FirestoreRepeatingQuestRepository(
             createdAt = rq.createdAt.instant,
             removedAt = rq.removedAt?.instant
         )
+    }
+
+    private fun createDbRepeatPattern(rq: DbRepeatingQuest): DbRepeatPattern {
+        val data = rq.repeatPattern
+
+        if (!data.containsKey("lastScheduledPeriodStart")) {
+            data["lastScheduledPeriodStart"] = null
+        }
+        if (!data.containsKey("skipEveryXPeriods")) {
+            if (data.containsKey("xDays")) {
+                data["skipEveryXPeriods"] = data["xDays"]
+            } else {
+                data["skipEveryXPeriods"] = 0
+            }
+        }
+
+        return DbRepeatPattern(data)
     }
 
     private fun createRepeatPattern(rp: DbRepeatPattern): RepeatPattern {
