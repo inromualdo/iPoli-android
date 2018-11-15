@@ -335,9 +335,4 @@ data class RepeatingQuest(
 
     val isFixed: Boolean
         get() = !isFlexible
-
-    fun isActive(date: LocalDate = LocalDate.now()): Boolean {
-        if (end == null) return true
-        return end?.startOfDayUTC() == date.startOfDayUTC()
-    }
 }
