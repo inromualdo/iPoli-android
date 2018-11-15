@@ -28,7 +28,7 @@ sealed class RepeatPattern(
 
         override val periodCount get() = DayOfWeek.values().size
 
-        override fun nextDateWithoutRange(from: LocalDate) = from
+        override fun findNextDateAfter(date: LocalDate) = date
     }
 
     data class Yearly(
@@ -45,10 +45,10 @@ sealed class RepeatPattern(
 
         override val periodCount get() = 1
 
-        override fun nextDateWithoutRange(from: LocalDate): LocalDate =
-            LocalDate.of(from.year, month, dayOfMonth).let {
+        override fun findNextDateAfter(date: LocalDate): LocalDate =
+            LocalDate.of(date.year, month, dayOfMonth).let {
                 when {
-                    it.isBefore(from) -> it.plusYears(1)
+                    it.isBefore(date) -> it.plusYears(1)
                     else -> it
                 }
             }
@@ -68,10 +68,10 @@ sealed class RepeatPattern(
 
         override val periodCount get() = daysOfWeek.size
 
-        override fun nextDateWithoutRange(from: LocalDate): LocalDate? {
+        override fun findNextDateAfter(date: LocalDate): LocalDate? {
             require(daysOfWeek.isNotEmpty())
             val doEveryXWeeks = skipEveryXWeeks + 1
-            var nextDate = from
+            var nextDate = date
 
             val schedulePeriodStart = periodRangeFor(startDate).start
 
@@ -101,13 +101,13 @@ sealed class RepeatPattern(
 
         override val periodCount get() = daysOfMonth.size
 
-        override fun nextDateWithoutRange(from: LocalDate): LocalDate? {
+        override fun findNextDateAfter(date: LocalDate): LocalDate? {
             require(daysOfMonth.isNotEmpty())
 
             val doEveryXMonths = skipEveryXMonths + 1
 
             val schedulePeriodStart = periodRangeFor(startDate).start
-            var nextDate = from
+            var nextDate = date
 
             while (true) {
                 val monthsPassed = schedulePeriodStart.monthsUntil(nextDate)
@@ -143,8 +143,8 @@ sealed class RepeatPattern(
             end = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
         )
 
-        override fun nextDateWithoutRange(from: LocalDate): LocalDate? {
-            var nextDate = from
+        override fun findNextDateAfter(date: LocalDate): LocalDate? {
+            var nextDate = date
             while (true) {
                 if (shouldBeDoneOn(nextDate)) {
                     return nextDate
@@ -179,17 +179,17 @@ sealed class RepeatPattern(
 
             override val periodCount get() = timesPerWeek
 
-            override fun nextDateWithoutRange(from: LocalDate): LocalDate? {
+            override fun findNextDateAfter(date: LocalDate): LocalDate? {
                 require(scheduledPeriods.isNotEmpty())
 
                 val periodStart =
-                    from.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                    date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
                 if (!scheduledPeriods.containsKey(periodStart)) {
                     return null
                 }
 
                 val nextDate =
-                    scheduledPeriods[periodStart]!!.sorted().firstOrNull { !it.isBefore(from) }
+                    scheduledPeriods[periodStart]!!.sorted().firstOrNull { !it.isBefore(date) }
                 return nextDate ?: firstDateForNextPeriod(periodStart)
             }
 
@@ -217,15 +217,15 @@ sealed class RepeatPattern(
 
             override val periodCount get() = timesPerMonth
 
-            override fun nextDateWithoutRange(from: LocalDate): LocalDate? {
+            override fun findNextDateAfter(date: LocalDate): LocalDate? {
                 require(scheduledPeriods.isNotEmpty())
-                val periodStart = from.with(TemporalAdjusters.firstDayOfMonth())
+                val periodStart = date.with(TemporalAdjusters.firstDayOfMonth())
 
                 if (!scheduledPeriods.containsKey(periodStart)) {
                     return null
                 }
 
-                val nextDate = scheduledPeriods[periodStart]!!.firstOrNull { !it.isBefore(from) }
+                val nextDate = scheduledPeriods[periodStart]!!.firstOrNull { !it.isBefore(date) }
                 return nextDate ?: firstDateFromNextPeriod(periodStart)
             }
 
@@ -241,13 +241,14 @@ sealed class RepeatPattern(
 
     abstract val periodCount: Int
     abstract fun periodRangeFor(date: LocalDate): PeriodRange
-    protected abstract fun nextDateWithoutRange(from: LocalDate): LocalDate?
+
+    protected abstract fun findNextDateAfter(date: LocalDate): LocalDate?
 
     fun nextDate(from: LocalDate) =
         when {
             endDate != null && from.isAfter(endDate) -> null
-            from.isBefore(startDate) -> nextDateWithoutRange(startDate)
-            else -> nextDateWithoutRange(from)
+            from.isBefore(startDate) -> findNextDateAfter(startDate)
+            else -> findNextDateAfter(from)
         }
 
     fun shouldScheduleOn(date: LocalDate): Boolean {
