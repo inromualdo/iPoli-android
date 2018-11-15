@@ -216,7 +216,6 @@ class RepeatPatternPickerDialogController :
             RepeatType.WEEKLY -> renderWeekly(view, state)
             RepeatType.MONTHLY -> renderMonthly(view, state)
             RepeatType.YEARLY -> renderYearly(view, state)
-            RepeatType.EVERY_X_DAYS -> renderEveryXDays(view, state)
         }
     }
 

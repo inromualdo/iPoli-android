@@ -32,30 +32,26 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
         fun doExecuteUseCase(
             quest: RepeatingQuest,
             start: LocalDate,
-            end: LocalDate,
             questRepo: QuestRepository = TestUtil.questRepoMock()
         ) =
             SaveQuestsForRepeatingQuestUseCase(questRepo, mock()).execute(
                 SaveQuestsForRepeatingQuestUseCase.Params(
                     repeatingQuest = quest,
-                    start = start,
-                    end = end
+                    start = start
                 )
             )
 
         fun executeUseCaseWithRepeatingQuestResult(
             quest: RepeatingQuest,
             start: LocalDate,
-            end: LocalDate,
             questRepo: QuestRepository = TestUtil.questRepoMock()
-        ) = doExecuteUseCase(quest, start, end, questRepo).repeatingQuest
+        ) = doExecuteUseCase(quest, start, questRepo).repeatingQuest
 
         fun executeUseCase(
             quest: RepeatingQuest,
             start: LocalDate,
-            end: LocalDate,
             questRepo: QuestRepository = TestUtil.questRepoMock()
-        ) = doExecuteUseCase(quest, start, end, questRepo).quests
+        ) = doExecuteUseCase(quest, start, questRepo).quests
 
 
         fun mockQuestsForRepeatingQuest(quests: List<Quest> = listOf()) =
@@ -79,8 +75,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
         it("should not schedule anything before quest startDate") {
             val quests = executeUseCase(
                 quest = createRepeatingQuest(start = lastDateOfWeek.plusDays(1)),
-                start = firstDateOfWeek,
-                end = lastDateOfWeek
+                start = firstDateOfWeek
             )
 
             quests.`should be empty`()
@@ -92,8 +87,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                     start = firstDateOfWeek.minusDays(2),
                     end = firstDateOfWeek.minusDays(1)
                 ),
-                start = firstDateOfWeek,
-                end = lastDateOfWeek
+                start = firstDateOfWeek
             )
 
             quests.`should be empty`()
@@ -105,8 +99,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
 
                 val quests = executeUseCase(
                     quest = TestUtil.repeatingQuest,
-                    start = firstDateOfWeek,
-                    end = lastDateOfWeek
+                    start = firstDateOfWeek
                 )
                 quests.size.`should be`(7)
             }
@@ -125,7 +118,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                 val quests = executeUseCase(
                     quest = TestUtil.repeatingQuest,
                     start = firstDateOfWeek,
-                    end = lastDateOfWeek,
                     questRepo = repo
                 )
                 quests.size.`should be`(7)
@@ -148,7 +140,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                 val quests = executeUseCase(
                     quest = TestUtil.repeatingQuest,
                     start = firstDateOfWeek,
-                    end = lastDateOfWeek,
                     questRepo = repo
                 )
                 quests.size.`should be`(7)
@@ -170,7 +161,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                 val quests = executeUseCase(
                     quest = TestUtil.repeatingQuest,
                     start = firstDateOfWeek,
-                    end = lastDateOfWeek,
                     questRepo = repo
                 )
                 quests.size.`should be`(6)
@@ -188,7 +178,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                         end = firstDateOfWeek.plusDays(3)
                     ),
                     start = firstDateOfWeek,
-                    end = lastDateOfWeek,
                     questRepo = repo
                 )
                 quests.size.`should be`(4)
@@ -204,7 +193,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                         end = lastDateOfWeek
                     ),
                     start = firstDateOfWeek,
-                    end = lastDateOfWeek,
                     questRepo = repo
                 )
                 quests.size.`should be`(6)
@@ -232,7 +220,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                             )
                         ),
                         start = firstDateOfWeek,
-                        end = lastDateOfWeek.plusDays(3),
                         questRepo = repo
                     )
                     quests.size.`should be`(5)
@@ -263,7 +250,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                             )
                         ),
                         start = firstDateOfWeek,
-                        end = lastDateOfWeek,
                         questRepo = repo
                     )
                     quests.size.`should be`(3)
@@ -275,14 +261,12 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
 
                 fun createQuest(
                     timesPerWeek: Int,
-                    preferredDays: Set<DayOfWeek> = setOf(),
-                    scheduledPeriods: Map<LocalDate, List<LocalDate>> = mapOf()
+                    preferredDays: Set<DayOfWeek> = setOf()
                 ): RepeatingQuest {
                     return TestUtil.repeatingQuest.copy(
                         repeatPattern = RepeatPattern.Flexible.Weekly(
                             timesPerWeek = timesPerWeek,
                             preferredDays = preferredDays,
-                            scheduledPeriods = scheduledPeriods,
                             startDate = firstDateOfWeek
                         )
                     )
@@ -298,8 +282,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                                 timesPerWeek = 1,
                                 preferredDays = setOf(DayOfWeek.MONDAY)
                             ),
-                            firstDateOfWeek,
-                            lastDateOfWeek
+                            firstDateOfWeek
                         )
                     }
                     exec shouldThrow IllegalArgumentException::class
@@ -312,8 +295,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                                 timesPerWeek = 0,
                                 preferredDays = setOf(DayOfWeek.MONDAY)
                             ),
-                            firstDateOfWeek,
-                            lastDateOfWeek
+                            firstDateOfWeek
                         )
                     }
                     exec shouldThrow IllegalArgumentException::class
@@ -326,8 +308,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                                 timesPerWeek = 8,
                                 preferredDays = setOf(DayOfWeek.MONDAY)
                             ),
-                            firstDateOfWeek,
-                            lastDateOfWeek
+                            firstDateOfWeek
                         )
                     }
                     exec shouldThrow IllegalArgumentException::class
@@ -338,8 +319,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                         createQuest(
                             timesPerWeek = 1
                         ),
-                        firstDateOfWeek,
-                        lastDateOfWeek
+                        firstDateOfWeek
                     )
 
                     quests.size.`should be`(1)
@@ -352,8 +332,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                             timesPerWeek = 1,
                             preferredDays = preferredDays
                         ),
-                        firstDateOfWeek,
-                        lastDateOfWeek
+                        firstDateOfWeek
                     )
 
                     quests.size.`should be`(1)
@@ -368,8 +347,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                             timesPerWeek = 2,
                             preferredDays = preferredDays
                         ),
-                        firstDateOfWeek,
-                        lastDateOfWeek
+                        firstDateOfWeek
                     )
 
                     quests.size.`should be`(2)
@@ -389,8 +367,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                             timesPerWeek = 3,
                             preferredDays = preferredDays
                         ),
-                        firstDateOfWeek.with(DayOfWeek.WEDNESDAY),
-                        lastDateOfWeek
+                        firstDateOfWeek.with(DayOfWeek.WEDNESDAY)
                     )
 
                     quests.size.`should be in range`(1, 2)
@@ -414,8 +391,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                         createQuest(
                             timesPerWeek = 6
                         ),
-                        firstDateOfWeek.with(DayOfWeek.SATURDAY),
-                        lastDateOfWeek
+                        firstDateOfWeek.with(DayOfWeek.SATURDAY)
                     )
 
                     quests.size.`should be in range`(1, 2)
@@ -444,8 +420,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                             timesPerWeek = 1,
                             preferredDays = possibleWeekDays
                         ),
-                        firstDateOfWeek.with(DayOfWeek.THURSDAY),
-                        lastDateOfWeek.plusDays(1).with(DayOfWeek.SATURDAY)
+                        firstDateOfWeek.with(DayOfWeek.THURSDAY)
                     )
 
                     quests.size.`should be in range`(1, 2)
@@ -467,11 +442,9 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                 it("should add 1 scheduled period") {
                     val rq = executeUseCaseWithRepeatingQuestResult(
                         createQuest(
-                            timesPerWeek = 1,
-                            scheduledPeriods = mapOf()
+                            timesPerWeek = 1
                         ),
-                        firstDateOfWeek,
-                        lastDateOfWeek
+                        firstDateOfWeek
                     )
 
                     val scheduledPeriods =
@@ -485,11 +458,9 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                 it("should add 2 scheduled periods") {
                     val rq = executeUseCaseWithRepeatingQuestResult(
                         createQuest(
-                            timesPerWeek = 3,
-                            scheduledPeriods = mapOf()
+                            timesPerWeek = 3
                         ),
-                        firstDateOfWeek.plusDays(1),
-                        lastDateOfWeek.plusDays(3)
+                        firstDateOfWeek.plusDays(1)
                     )
 
                     val scheduledPeriods =
@@ -512,13 +483,9 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
 
                     val rq = executeUseCaseWithRepeatingQuestResult(
                         createQuest(
-                            timesPerWeek = 3,
-                            scheduledPeriods = mapOf(
-                                firstDateOfWeek to scheduledPeriodDates
-                            )
+                            timesPerWeek = 3
                         ),
-                        firstDateOfWeek.plusDays(1),
-                        lastDateOfWeek.plusDays(3)
+                        firstDateOfWeek.plusDays(1)
                     )
 
                     val scheduledPeriods =
@@ -548,7 +515,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                             )
                         ),
                         start = start,
-                        end = end,
                         questRepo = repo
                     )
                     quests.size.`should be`(5)
@@ -558,7 +524,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                 it("should not schedule for stored quests") {
 
                     val start = LocalDate.of(2000, 2, 1)
-                    val end = LocalDate.of(2000, 3, 15)
 
                     val repo = mockQuestsForRepeatingQuest(
                         listOf(
@@ -576,7 +541,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                             )
                         ),
                         start = start,
-                        end = end,
                         questRepo = repo
                     )
                     quests.size.`should be`(5)
@@ -592,14 +556,12 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
 
                 fun createQuest(
                     timesPerMonth: Int,
-                    preferredDays: Set<Int> = setOf(),
-                    scheduledPeriods: Map<LocalDate, List<LocalDate>> = mapOf()
+                    preferredDays: Set<Int> = setOf()
                 ): RepeatingQuest {
                     return TestUtil.repeatingQuest.copy(
                         repeatPattern = RepeatPattern.Flexible.Monthly(
                             timesPerMonth = timesPerMonth,
                             preferredDays = preferredDays,
-                            scheduledPeriods = scheduledPeriods,
                             startDate = firstJanuary
                         )
                     )
@@ -614,8 +576,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                                 timesPerMonth = 1,
                                 preferredDays = setOf(1)
                             ),
-                            firstDateOfWeek,
-                            lastDateOfWeek
+                            firstDateOfWeek
                         )
                     }
                     exec shouldThrow IllegalArgumentException::class
@@ -628,8 +589,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                                 timesPerMonth = 0,
                                 preferredDays = setOf(1)
                             ),
-                            firstDateOfWeek,
-                            lastDateOfWeek
+                            firstDateOfWeek
                         )
                     }
                     exec shouldThrow IllegalArgumentException::class
@@ -642,8 +602,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                                 timesPerMonth = 32,
                                 preferredDays = setOf(1)
                             ),
-                            firstDateOfWeek,
-                            lastDateOfWeek
+                            firstDateOfWeek
                         )
                     }
                     exec shouldThrow IllegalArgumentException::class
@@ -654,8 +613,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                         createQuest(
                             timesPerMonth = 1
                         ),
-                        firstJanuary,
-                        lastJanuary
+                        firstJanuary
                     )
 
                     quests.size.`should be`(1)
@@ -668,8 +626,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                             timesPerMonth = 1,
                             preferredDays = preferredDays
                         ),
-                        firstJanuary,
-                        lastJanuary
+                        firstJanuary
                     )
                     quests.size.`should be`(1)
                     val scheduledDate = quests.first().scheduledDate
@@ -683,8 +640,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                             timesPerMonth = 2,
                             preferredDays = preferredDays
                         ),
-                        firstJanuary,
-                        lastJanuary
+                        firstJanuary
                     )
 
                     quests.size.`should be`(2)
@@ -699,8 +655,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                             timesPerMonth = 3,
                             preferredDays = preferredDays
                         ),
-                        firstJanuary.plusDays(15),
-                        lastJanuary
+                        firstJanuary.plusDays(15)
                     )
 
                     quests.size.`should be in range`(1, 2)
@@ -721,8 +676,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                         createQuest(
                             timesPerMonth = 30
                         ),
-                        firstJanuary.plusDays(29),
-                        lastJanuary
+                        firstJanuary.plusDays(29)
                     )
 
                     quests.size.`should be in range`(1, 2)
@@ -743,8 +697,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                         createQuest(
                             timesPerMonth = 30
                         ),
-                        firstFebruary,
-                        lastFebruary
+                        firstFebruary
                     )
 
                     quests.size.`should be`(firstFebruary.lengthOfMonth())
@@ -757,8 +710,7 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                             timesPerMonth = 1,
                             preferredDays = possibleMonthDays
                         ),
-                        firstJanuary.plusDays(15),
-                        firstFebruary.plusDays(25)
+                        firstJanuary.plusDays(15)
                     )
 
                     quests.size.`should be in range`(1, 2)
@@ -779,11 +731,9 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                 it("should add 1 scheduled period") {
                     val rq = executeUseCaseWithRepeatingQuestResult(
                         createQuest(
-                            timesPerMonth = 1,
-                            scheduledPeriods = mapOf()
+                            timesPerMonth = 1
                         ),
-                        firstJanuary,
-                        lastJanuary
+                        firstJanuary
                     )
 
                     val scheduledPeriods =
@@ -797,11 +747,9 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                 it("should add 2 scheduled periods") {
                     val rq = executeUseCaseWithRepeatingQuestResult(
                         createQuest(
-                            timesPerMonth = 3,
-                            scheduledPeriods = mapOf()
+                            timesPerMonth = 3
                         ),
-                        firstJanuary.plusDays(7),
-                        lastFebruary.minusDays(7)
+                        firstJanuary.plusDays(7)
                     )
 
                     val scheduledPeriods =
@@ -824,13 +772,9 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
 
                     val rq = executeUseCaseWithRepeatingQuestResult(
                         createQuest(
-                            timesPerMonth = 3,
-                            scheduledPeriods = mapOf(
-                                firstFebruary to scheduledPeriodDates
-                            )
+                            timesPerMonth = 3
                         ),
-                        firstJanuary.plusDays(7),
-                        lastFebruary.minusDays(7)
+                        firstJanuary.plusDays(7)
                     )
 
                     val scheduledPeriods =
@@ -862,7 +806,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                         )
                     ),
                     start = firstDateOfWeek.plusDays(1),
-                    end = lastDateOfWeek,
                     questRepo = repo
                 )
                 quests.`should be empty`()
@@ -880,7 +823,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                         )
                     ),
                     start = firstDateOfWeek,
-                    end = lastDateOfWeek,
                     questRepo = repo
                 )
                 quests.size.`should be`(1)
@@ -906,7 +848,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                         )
                     ),
                     start = firstDateOfWeek,
-                    end = lastDateOfWeek,
                     questRepo = repo
                 )
                 quests.size.`should be`(1)
@@ -934,7 +875,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                         )
                     ),
                     start = firstDateOfWeek,
-                    end = lastDateOfWeek,
                     questRepo = repo
                 )
                 quests.`should be empty`()
@@ -942,7 +882,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
 
             it("should schedule quests for 3 years") {
                 val start = firstDateOfWeek
-                val end = firstDateOfWeek.plusYears(3)
                 val repo = mockQuestsForRepeatingQuest(listOf())
 
                 val quests = executeUseCase(
@@ -954,7 +893,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                         )
                     ),
                     start = start,
-                    end = end,
                     questRepo = repo
                 )
                 quests.size.`should be`(3)
@@ -963,7 +901,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
 
             it("should schedule 1 quest and use 2 stored quests for 3 years") {
                 val start = firstDateOfWeek
-                val end = firstDateOfWeek.plusYears(3)
                 val repo = mockQuestsForRepeatingQuest(
                     listOf(
                         TestUtil.quest.copy(
@@ -986,7 +923,6 @@ class SaveQuestsForRepeatingQuestUseCaseSpek : Spek({
                         )
                     ),
                     start = start,
-                    end = end,
                     questRepo = repo
                 )
                 quests.size.`should be`(3)

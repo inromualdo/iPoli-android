@@ -111,11 +111,13 @@ object RepeatPatternReducer : BaseViewStateReducer<RepeatPatternViewState>() {
                 val isFlexible =
                     pattern?.let { it is RepeatPattern.Flexible } ?: defaultState().isFlexible
 
-                val everyXDaysCountIndex = pattern?.let {
-                    if (it is RepeatPattern.EveryXDays) {
-                        defaultState().everyXDaysValues.indexOfFirst { v -> v == it.xDays }
-                    } else defaultState().everyXDaysCountIndex
-                } ?: defaultState().everyXDaysCountIndex
+//                val everyXDaysCountIndex = pattern?.let {
+//                    if (it is RepeatPattern.EveryXDays) {
+//                        defaultState().everyXDaysValues.indexOfFirst { v -> v == it.xDays }
+//                    } else defaultState().everyXDaysCountIndex
+//                } ?: defaultState().everyXDaysCountIndex
+
+                val everyXDaysCountIndex = defaultState().everyXDaysCountIndex
 
                 subState.copy(
                     type = DATA_LOADED,
@@ -264,7 +266,8 @@ object RepeatPatternReducer : BaseViewStateReducer<RepeatPatternViewState>() {
                         timesPerMonth = state.monthDaysCount,
                         preferredDays = state.selectedMonthDays,
                         startDate = state.startDate,
-                        endDate = state.endDate
+                        endDate = state.endDate,
+                        skipEveryXPeriods = state.skipEveryXPeriods
                     )
                 } else {
                     RepeatPattern.Monthly(
@@ -283,14 +286,6 @@ object RepeatPatternReducer : BaseViewStateReducer<RepeatPatternViewState>() {
                     endDate = state.endDate
                 )
             }
-            RepeatType.EVERY_X_DAYS -> {
-                RepeatPattern.EveryXDays(
-                    xDays = state.everyXDaysValues[state.everyXDaysCountIndex],
-                    startDate = state.startDate,
-                    endDate = state.endDate
-                )
-            }
-
         }
 
     private fun isFlexible(
@@ -300,7 +295,6 @@ object RepeatPatternReducer : BaseViewStateReducer<RepeatPatternViewState>() {
         when (repeatType) {
             RepeatType.DAILY -> false
             RepeatType.YEARLY -> false
-            RepeatType.EVERY_X_DAYS -> false
             RepeatType.WEEKLY -> {
                 val daysCount = state.weekCountValues[state.weekDaysCountIndex]
                 daysCount != state.selectedWeekDays.size
@@ -350,7 +344,8 @@ object RepeatPatternReducer : BaseViewStateReducer<RepeatPatternViewState>() {
             endDate = null,
             pickerEndDate = LocalDate.now(),
             resultPattern = null,
-            petAvatar = null
+            petAvatar = null,
+            skipEveryXPeriods = 0
         )
 
 }
@@ -361,6 +356,7 @@ data class RepeatPatternViewState(
     val repeatTypeIndex: Int,
     val weekDaysCountIndex: Int,
     val monthDaysCountIndex: Int,
+    val skipEveryXPeriods: Int,
     val everyXDaysCountIndex: Int,
     val selectedWeekDays: Set<DayOfWeek>,
     val selectedMonthDays: Set<Int>,
