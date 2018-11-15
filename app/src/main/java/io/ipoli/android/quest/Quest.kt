@@ -237,9 +237,6 @@ data class Quest(
 
     fun hasExceededEstimatedDuration() = timeRanges.sumBy { it.duration } >= duration
 
-    fun areAllTimeRangesCompleted() = timeRangesToComplete.isNotEmpty() &&
-        timeRangesToComplete.count { it.start != null && it.end != null } == timeRangesToComplete.size
-
     val isFromRepeatingQuest get() = repeatingQuestId != null
 
     val isFromChallenge get() = challengeId != null
