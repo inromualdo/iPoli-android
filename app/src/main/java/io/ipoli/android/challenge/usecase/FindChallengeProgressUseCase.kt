@@ -2,15 +2,11 @@ package io.ipoli.android.challenge.usecase
 
 import io.ipoli.android.challenge.entity.Challenge
 import io.ipoli.android.common.UseCase
-import io.ipoli.android.common.datetime.*
+import io.ipoli.android.common.datetime.DateUtils
+import io.ipoli.android.common.datetime.Time
+import io.ipoli.android.common.datetime.datesBetween
+import io.ipoli.android.common.datetime.isBetween
 import io.ipoli.android.quest.Quest
-import io.ipoli.android.repeatingquest.entity.RepeatPattern
-import io.ipoli.android.repeatingquest.entity.RepeatPattern.Companion.everyXDatesToScheduleInPeriod
-import io.ipoli.android.repeatingquest.entity.RepeatPattern.Companion.findMonthlyPeriods
-import io.ipoli.android.repeatingquest.entity.RepeatPattern.Companion.findWeeklyPeriods
-import io.ipoli.android.repeatingquest.entity.RepeatPattern.Companion.monthlyDatesToScheduleInPeriod
-import io.ipoli.android.repeatingquest.entity.RepeatPattern.Companion.weeklyDatesToScheduleInPeriod
-import io.ipoli.android.repeatingquest.entity.RepeatPattern.Companion.yearlyDatesToScheduleInPeriod
 import org.threeten.bp.DayOfWeek
 import org.threeten.bp.LocalDate
 
@@ -32,49 +28,50 @@ class FindChallengeProgressUseCase : UseCase<FindChallengeProgressUseCase.Params
             val removedCount =
                 challenge.quests.filter { it.repeatingQuestId == rq.id && it.isRemoved }.size
 
-            val allCount = when (repeatingPattern) {
-                is RepeatPattern.Daily -> {
-                    start.daysUntil(end).toInt() + 1
-                }
-
-                is RepeatPattern.Weekly -> {
-                    weeklyDatesToScheduleInPeriod(repeatingPattern, start, end).size
-                }
-
-                is RepeatPattern.Monthly -> {
-                    monthlyDatesToScheduleInPeriod(repeatingPattern, start, end).size
-                }
-
-                is RepeatPattern.Yearly -> {
-                    yearlyDatesToScheduleInPeriod(repeatingPattern, start, end).size
-                }
-
-                is RepeatPattern.EveryXDays -> {
-                    everyXDatesToScheduleInPeriod(repeatingPattern, start, end).size
-                }
-
-                is RepeatPattern.Flexible.Weekly -> {
-                    val periods = findWeeklyPeriods(start, end)
-                    periods.sumBy {
-                        if (repeatingPattern.scheduledPeriods.containsKey(it.start)) {
-                            repeatingPattern.scheduledPeriods[it.start]!!.size
-                        } else {
-                            repeatingPattern.timesPerWeek
-                        }
-                    }
-                }
-
-                is RepeatPattern.Flexible.Monthly -> {
-                    val periods = findMonthlyPeriods(start, end)
-                    periods.sumBy {
-                        if (repeatingPattern.scheduledPeriods.containsKey(it.start)) {
-                            repeatingPattern.scheduledPeriods[it.start]!!.size
-                        } else {
-                            repeatingPattern.timesPerMonth
-                        }
-                    }
-                }
-            }
+            val allCount = 0
+//            when (repeatingPattern) {
+//                is RepeatPattern.Daily -> {
+//                    start.daysUntil(end).toInt() + 1
+//                }
+//
+//                is RepeatPattern.Weekly -> {
+//                    weeklyDatesToScheduleInPeriod(repeatingPattern, start, end).size
+//                }
+//
+//                is RepeatPattern.Monthly -> {
+//                    monthlyDatesToScheduleInPeriod(repeatingPattern, start, end).size
+//                }
+//
+//                is RepeatPattern.Yearly -> {
+//                    yearlyDatesToScheduleInPeriod(repeatingPattern, start, end).size
+//                }
+//
+//                is RepeatPattern.EveryXDays -> {
+//                    everyXDatesToScheduleInPeriod(repeatingPattern, start, end).size
+//                }
+//
+//                is RepeatPattern.Flexible.Weekly -> {
+//                    val periods = findWeeklyPeriods(start, end)
+//                    periods.sumBy {
+//                        if (repeatingPattern.scheduledPeriods.containsKey(it.start)) {
+//                            repeatingPattern.scheduledPeriods[it.start]!!.size
+//                        } else {
+//                            repeatingPattern.timesPerWeek
+//                        }
+//                    }
+//                }
+//
+//                is RepeatPattern.Flexible.Monthly -> {
+//                    val periods = findMonthlyPeriods(start, end)
+//                    periods.sumBy {
+//                        if (repeatingPattern.scheduledPeriods.containsKey(it.start)) {
+//                            repeatingPattern.scheduledPeriods[it.start]!!.size
+//                        } else {
+//                            repeatingPattern.timesPerMonth
+//                        }
+//                    }
+//                }
+//            }
 
             allCount - removedCount
         }
