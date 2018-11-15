@@ -70,7 +70,7 @@ sealed class RepeatPattern {
             if (periodStart.isBefore(startDate)) {
                 periodStart = startDate
             }
-            return periodStart.datesBetween(endDate).filter { shouldBeDoneOn(it) }
+            return periodStart.datesBetween(endDate).filter { shouldDoOn(it) }
         }
 
         override fun periodRangeFor(date: LocalDate) =
@@ -81,7 +81,7 @@ sealed class RepeatPattern {
 
         override val periodCount get() = DayOfWeek.values().size
 
-        private fun shouldBeDoneOn(date: LocalDate): Boolean {
+        private fun shouldDoOn(date: LocalDate): Boolean {
             if (skipEveryXPeriods == 0) return true
             return startDate.daysUntil(date) % skipEveryXPeriods == 0L
         }
@@ -108,7 +108,7 @@ sealed class RepeatPattern {
             ) {
                 return emptyList()
             }
-            return startDateForPeriod.datesBetween(period.end).filter { shouldBeDoneOn(it) }
+            return startDateForPeriod.datesBetween(period.end).filter { shouldDoOn(it) }
         }
     }
 
@@ -138,7 +138,7 @@ sealed class RepeatPattern {
             }
 
             val dates = mutableListOf<LocalDate>()
-            while(periodStart.isBeforeOrEqual(endDate)) {
+            while (periodStart.isBeforeOrEqual(endDate)) {
                 dates.add(LocalDate.of(periodStart.year, month, dayOfMonth))
                 periodStart = periodStart.plusYears(1)
             }
@@ -246,7 +246,18 @@ sealed class RepeatPattern {
         override fun createPlaceholderDates(
             startDate: LocalDate,
             endDate: LocalDate
-        ) = emptyList<LocalDate>()
+        ): List<LocalDate> {
+            var periodStart = periodRangeFor(startDate).start
+            lastScheduledPeriodStart?.let {
+                while (periodStart.isBeforeOrEqual(lastScheduledPeriodStart)) {
+                    periodStart = periodStart.plusMonths(1)
+                }
+            }
+            if (periodStart.isBefore(startDate)) {
+                periodStart = startDate
+            }
+            return periodStart.datesBetween(endDate).filter { shouldDoOn(it) }
+        }
 
         override val periodCount get() = daysOfMonth.size
 
