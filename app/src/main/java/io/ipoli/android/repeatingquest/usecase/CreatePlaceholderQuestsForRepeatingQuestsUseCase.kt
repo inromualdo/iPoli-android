@@ -5,7 +5,6 @@ import io.ipoli.android.quest.Quest
 import io.ipoli.android.quest.RepeatingQuest
 import io.ipoli.android.repeatingquest.persistence.RepeatingQuestRepository
 import org.threeten.bp.LocalDate
-import timber.log.Timber
 
 /**
  * Created by Polina Zhelyazkova <polina@mypoli.fun>
@@ -26,27 +25,24 @@ class CreatePlaceholderQuestsForRepeatingQuestsUseCase(
 
         val rqs = repeatingQuestRepository.findAllActive(currentDate)
 
-        return rqs.filter { it.isFixed }.map {
+        return rqs.map {
             val rqStart = it.start
             if (end.isBefore(rqStart)) {
-                return@map listOf<Quest>()
+                return@map emptyList<Quest>()
             }
 
             val rqEnd = it.end
             if (rqEnd != null && start.isAfter(rqEnd)) {
-                return@map listOf<Quest>()
+                return@map emptyList<Quest>()
             }
 
             val currStart = if (start.isBefore(rqStart)) rqStart else start
+            val currEnd = if (rqEnd != null && rqEnd.isBefore(end)) rqEnd else end
 
-            Timber.d("AAA start $currStart $rqEnd")
-
-            val (scheduleDates, _) = it.repeatPattern.createSchedule(
+            val scheduleDates = it.repeatPattern.createPlaceholderDates(
                 currStart,
-                rqEnd
+                currEnd
             )
-
-            Timber.d("AAA $scheduleDates")
 
             if (scheduleDates.isNotEmpty()) {
                 scheduleDates.map { date ->
