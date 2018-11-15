@@ -740,7 +740,6 @@ class MainUseCaseModule(private val context: Context) : UseCaseModule {
 
     override val createPlaceholderQuestsForRepeatingQuestsUseCase
         get() = CreatePlaceholderQuestsForRepeatingQuestsUseCase(
-            questRepository,
             repeatingQuestRepository
         )
 

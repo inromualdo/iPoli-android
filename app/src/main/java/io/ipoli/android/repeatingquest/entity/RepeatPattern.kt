@@ -17,7 +17,6 @@ sealed class RepeatPattern {
     abstract val lastScheduledPeriodStart: LocalDate?
     abstract val skipEveryXPeriods: Int
     abstract val periodCount: Int
-    abstract val scheduleAheadPeriods: Int
 
     abstract fun periodRangeFor(date: LocalDate): PeriodRange
 
@@ -46,11 +45,9 @@ sealed class RepeatPattern {
     data class Daily(
         override val startDate: LocalDate = LocalDate.now(),
         override val endDate: LocalDate? = null,
-        override val lastScheduledPeriodStart: LocalDate?,
-        override val skipEveryXPeriods: Int
+        override val lastScheduledPeriodStart: LocalDate? = null,
+        override val skipEveryXPeriods: Int = 0
     ) : RepeatPattern() {
-
-        override val scheduleAheadPeriods: Int = 1
 
         override fun periodRangeFor(date: LocalDate) =
             PeriodRange(
@@ -94,11 +91,10 @@ sealed class RepeatPattern {
         val month: Month,
         override val startDate: LocalDate = LocalDate.now(),
         override val endDate: LocalDate? = null,
-        override val lastScheduledPeriodStart: LocalDate?
+        override val lastScheduledPeriodStart: LocalDate? = null
     ) : RepeatPattern() {
 
         override val skipEveryXPeriods: Int = 0
-        override val scheduleAheadPeriods: Int = 1
         override val periodCount get() = 1
 
         override fun periodRangeFor(date: LocalDate) =
@@ -133,11 +129,10 @@ sealed class RepeatPattern {
         val daysOfWeek: Set<DayOfWeek>,
         override val startDate: LocalDate = LocalDate.now(),
         override val endDate: LocalDate? = null,
-        override val lastScheduledPeriodStart: LocalDate?,
-        override val skipEveryXPeriods: Int
+        override val lastScheduledPeriodStart: LocalDate? = null,
+        override val skipEveryXPeriods: Int = 0
     ) : RepeatPattern() {
 
-        override val scheduleAheadPeriods: Int = 1
         override val periodCount get() = daysOfWeek.size
 
         override fun periodRangeFor(date: LocalDate) =
@@ -178,11 +173,9 @@ sealed class RepeatPattern {
         val daysOfMonth: Set<Int>,
         override val startDate: LocalDate = LocalDate.now(),
         override val endDate: LocalDate? = null,
-        override val lastScheduledPeriodStart: LocalDate?,
-        override val skipEveryXPeriods: Int
+        override val lastScheduledPeriodStart: LocalDate? = null,
+        override val skipEveryXPeriods: Int = 0
     ) : RepeatPattern() {
-
-        override val scheduleAheadPeriods: Int = 1
 
         override val periodCount get() = daysOfMonth.size
 
@@ -228,10 +221,8 @@ sealed class RepeatPattern {
             override val startDate: LocalDate = LocalDate.now(),
             override val endDate: LocalDate? = null,
             override val lastScheduledPeriodStart: LocalDate? = null,
-            override val skipEveryXPeriods: Int
+            override val skipEveryXPeriods: Int = 0
         ) : Flexible() {
-
-            override val scheduleAheadPeriods = 1
 
             override fun periodRangeFor(date: LocalDate) =
                 PeriodRange(
@@ -290,8 +281,6 @@ sealed class RepeatPattern {
             override val lastScheduledPeriodStart: LocalDate? = null,
             override val skipEveryXPeriods: Int
         ) : Flexible() {
-
-            override val scheduleAheadPeriods = 1
 
             override fun periodRangeFor(date: LocalDate) =
                 PeriodRange(

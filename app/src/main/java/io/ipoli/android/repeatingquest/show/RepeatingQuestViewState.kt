@@ -148,10 +148,6 @@ object RepeatingQuestReducer : BaseViewStateReducer<RepeatingQuestViewState>() {
                 repeatPattern.periodCount
             )
 
-            is RepeatPattern.EveryXDays -> RepeatingQuestViewState.RepeatType.EveryXDays(
-                repeatPattern.xDays
-            )
-
             is RepeatPattern.Monthly, is RepeatPattern.Flexible.Monthly -> RepeatingQuestViewState.RepeatType.Monthly(
                 repeatPattern.periodCount
             )
