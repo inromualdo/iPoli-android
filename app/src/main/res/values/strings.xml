@@ -543,7 +543,6 @@
         <item>Week</item>
         <item>Month</item>
         <item>Year</item>
-        <item>X days</item>
     </string-array>
 
 
@@ -1282,4 +1281,5 @@ These are your physical and mental characteristics.\n\n
     <string name="remind_me_at">Remind me at</string>
     <string name="edit_habit_max_reminders_hint">Maximum number of Reminders reached. You can set a Reminder for each time you do the Habit per day.</string>
     <string name="not_done_yet">Not done yet</string>
+    <string name="repeat_pattern_picker_title">How to repeat?</string>
 </resources>
