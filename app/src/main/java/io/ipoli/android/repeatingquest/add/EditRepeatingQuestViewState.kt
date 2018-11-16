@@ -429,7 +429,6 @@ data class EditRepeatingQuestViewState(
     val tags: List<Tag>,
     val questTags: List<Tag>,
     val subQuests: Map<String, SubQuest>,
-//    val subQuestNames: List<String>,
     val newSubQuestName: String,
     val startTime: Time?,
     val color: Color,
