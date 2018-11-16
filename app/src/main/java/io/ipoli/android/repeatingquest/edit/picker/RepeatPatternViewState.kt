@@ -54,9 +54,7 @@ sealed class RepeatPatternAction : Action {
         override fun toMap() = mapOf("date" to date)
     }
 
-    data class ChangeEveryXDaysCount(val index: Int) : RepeatPatternAction() {
-        override fun toMap() = mapOf("index" to index)
-    }
+    data class ChangeSkipInterval(val index: Int) : RepeatPatternAction()
 
     object CreatePattern : RepeatPatternAction()
 }
@@ -70,8 +68,8 @@ object RepeatPatternReducer : BaseViewStateReducer<RepeatPatternViewState>() {
         state: AppState,
         subState: RepeatPatternViewState,
         action: Action
-    ): RepeatPatternViewState {
-        return when (action) {
+    ) =
+        when (action) {
             is RepeatPatternAction.LoadData -> {
                 val pattern = action.repeatPattern
                 val repeatType = pattern?.repeatType ?: defaultState().repeatType
@@ -188,11 +186,25 @@ object RepeatPatternReducer : BaseViewStateReducer<RepeatPatternViewState>() {
                 )
             }
 
-            is RepeatPatternAction.ChangeEveryXDaysCount -> {
-                subState.copy(
-                    type = EVERY_X_DAYS_CHANGED,
-                    everyXDaysCountIndex = action.index
+            is RepeatPatternAction.ChangeSkipInterval -> {
+                val newState = subState.copy(
+                    type = SKIP_INTERVAL_CHANGED
                 )
+
+                when {
+                    subState.repeatType == RepeatType.DAILY ->
+                        newState.copy(
+                            everyXDaysCountIndex = action.index
+                        )
+                    subState.repeatType == RepeatType.WEEKLY ->
+                        newState.copy(
+                            everyXWeeksCountIndex = action.index
+                        )
+                    else ->
+                        newState.copy(
+                            everyXMonthsCountIndex = action.index
+                        )
+                }
             }
 
             is RepeatPatternAction.ChangeDayOfYear -> {
@@ -231,7 +243,6 @@ object RepeatPatternReducer : BaseViewStateReducer<RepeatPatternViewState>() {
                 subState
             }
         }
-    }
 
     private fun createRepeatPattern(state: RepeatPatternViewState): RepeatPattern =
         when (state.repeatType) {
@@ -387,7 +398,7 @@ data class RepeatPatternViewState(
         START_DATE_CHANGED,
         END_DATE_CHANGED,
         PATTERN_CREATED,
-        EVERY_X_DAYS_CHANGED
+        SKIP_INTERVAL_CHANGED
     }
 
     val weekDaysCount

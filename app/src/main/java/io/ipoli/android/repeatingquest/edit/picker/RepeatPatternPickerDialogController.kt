@@ -167,7 +167,7 @@ class RepeatPatternPickerDialogController :
                     position: Int,
                     id: Long
                 ) {
-//                    dispatch(RepeatPatternAction.ChangeEveryXDaysCount(position))
+                    dispatch(RepeatPatternAction.ChangeSkipInterval(position))
                 }
 
             }
