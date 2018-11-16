@@ -229,6 +229,8 @@ class HomeViewController(args: Bundle? = null) :
                 RouterTransaction.with(TodayViewController())
             )
         }
+
+        navigate().toRepeatPatternPicker(resultListener = {})
     }
 
     override fun onDetach(view: View) {

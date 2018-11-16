@@ -130,14 +130,14 @@
             android:layout_marginStart="24dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:text="Skip every"
+            android:text="Skip"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             android:textColor="?android:textColorSecondary"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/skipEvery"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/skipEvery"
-            tools:text="Skip every" />
+            tools:text="Skip" />
 
         <TextView
             android:id="@+id/textView5"
@@ -241,6 +241,7 @@
             android:layout_height="32dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
+            android:background="@drawable/bordered_rectangle_accent_background"
             android:dropDownWidth="wrap_content"
             app:layout_constraintStart_toEndOf="@+id/skipEveryText"
             app:layout_constraintTop_toBottomOf="@+id/rpPetSchedulingHint" />

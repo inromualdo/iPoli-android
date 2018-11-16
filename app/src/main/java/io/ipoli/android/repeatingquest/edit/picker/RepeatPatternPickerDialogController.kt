@@ -24,6 +24,7 @@ import io.ipoli.android.common.ViewUtils
 import io.ipoli.android.common.datetime.DateUtils
 import io.ipoli.android.common.text.DateFormatter
 import io.ipoli.android.common.view.*
+import io.ipoli.android.pet.AndroidPetAvatar
 import io.ipoli.android.repeatingquest.edit.picker.RepeatPatternViewState.StateType.*
 import io.ipoli.android.repeatingquest.entity.RepeatPattern
 import io.ipoli.android.repeatingquest.entity.RepeatType
@@ -81,6 +82,8 @@ class RepeatPatternPickerDialogController :
         when (state.type) {
 
             DATA_LOADED -> {
+                val petHead = AndroidPetAvatar.valueOf(state.petAvatar.name).headImage
+                changeIcon(petHead)
                 renderStartDate(view, state)
                 initStartDateListener(view, state)
 
@@ -90,7 +93,7 @@ class RepeatPatternPickerDialogController :
                 renderForRepeatType(state, view)
 
                 view.rpPetSchedulingHint.setCompoundDrawablesWithIntrinsicBounds(
-                    ContextCompat.getDrawable(view.context, state.petAvatar!!),
+                    ContextCompat.getDrawable(view.context, petHead),
                     null,
                     null,
                     null
@@ -491,7 +494,6 @@ class RepeatPatternPickerDialogController :
 
     override fun onHeaderViewCreated(headerView: View) {
         headerView.dialogHeaderTitle.text = "Pick repeating pattern"
-        headerView.dialogHeaderIcon.setImageResource(R.drawable.logo)
     }
 
     data class WeekDayViewModel(

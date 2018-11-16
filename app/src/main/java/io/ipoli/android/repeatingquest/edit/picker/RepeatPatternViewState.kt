@@ -1,12 +1,11 @@
 package io.ipoli.android.repeatingquest.edit.picker
 
-import android.support.annotation.DrawableRes
 import io.ipoli.android.common.AppState
 import io.ipoli.android.common.BaseViewStateReducer
-
+import io.ipoli.android.common.DataLoadedAction
 import io.ipoli.android.common.redux.Action
 import io.ipoli.android.common.redux.BaseViewState
-import io.ipoli.android.pet.AndroidPetAvatar
+import io.ipoli.android.pet.PetAvatar
 import io.ipoli.android.repeatingquest.edit.picker.RepeatPatternViewState.StateType.*
 import io.ipoli.android.repeatingquest.entity.RepeatPattern
 import io.ipoli.android.repeatingquest.entity.RepeatType
@@ -106,21 +105,13 @@ object RepeatPatternReducer : BaseViewStateReducer<RepeatPatternViewState>() {
                 val startDate = pattern?.startDate ?: subState.startDate
                 val endDate = pattern?.endDate ?: subState.endDate
 
-                val petAvatar = AndroidPetAvatar.valueOf(state.dataState.player!!.pet.avatar.name)
-
                 val isFlexible =
                     pattern?.let { it is RepeatPattern.Flexible } ?: defaultState().isFlexible
-
-//                val everyXDaysCountIndex = pattern?.let {
-//                    if (it is RepeatPattern.EveryXDays) {
-//                        defaultState().everyXDaysValues.indexOfFirst { v -> v == it.xDays }
-//                    } else defaultState().everyXDaysCountIndex
-//                } ?: defaultState().everyXDaysCountIndex
 
                 val everyXDaysCountIndex = defaultState().everyXDaysCountIndex
 
                 subState.copy(
-                    type = DATA_LOADED,
+                    type = if (state.dataState.player == null) LOADING else DATA_LOADED,
                     repeatType = repeatType,
                     repeatTypeIndex = repeatTypeIndexFor(repeatType),
                     weekDaysCountIndex = weekDaysCountIndex,
@@ -132,9 +123,15 @@ object RepeatPatternReducer : BaseViewStateReducer<RepeatPatternViewState>() {
                     startDate = startDate,
                     endDate = endDate,
                     pickerEndDate = endDate ?: subState.pickerEndDate,
-                    petAvatar = petAvatar.headImage
+                    petAvatar = state.dataState.player?.pet?.avatar ?: subState.petAvatar
                 )
             }
+
+            is DataLoadedAction.PlayerChanged ->
+                subState.copy(
+                    type = DATA_LOADED,
+                    petAvatar = action.player.pet.avatar
+                )
 
             is RepeatPatternAction.ChangeFrequency -> {
                 val repeatType = repeatTypeForIndex(action.index)
@@ -333,18 +330,22 @@ object RepeatPatternReducer : BaseViewStateReducer<RepeatPatternViewState>() {
             weekDaysCountIndex = 0,
             monthDaysCountIndex = 0,
             everyXDaysCountIndex = 0,
+            everyXWeeksCountIndex = 0,
+            everyXMonthsCountIndex = 0,
             selectedWeekDays = setOf(),
             selectedMonthDays = setOf(),
             weekCountValues = (1..6).toList(),
             monthCountValues = (1..31).toList(),
-            everyXDaysValues = (2..7).toList(),
+            everyXDaysValues = (0..20).toList(),
+            everyXWeeksValues = (0..10).toList(),
+            everyXMonthsValues = (0..5).toList(),
             isFlexible = true,
             dayOfYear = LocalDate.now(),
             startDate = LocalDate.now(),
             endDate = null,
             pickerEndDate = LocalDate.now(),
             resultPattern = null,
-            petAvatar = null,
+            petAvatar = PetAvatar.BEAR,
             skipEveryXPeriods = 0
         )
 
@@ -358,18 +359,22 @@ data class RepeatPatternViewState(
     val monthDaysCountIndex: Int,
     val skipEveryXPeriods: Int,
     val everyXDaysCountIndex: Int,
+    val everyXWeeksCountIndex: Int,
+    val everyXMonthsCountIndex: Int,
     val selectedWeekDays: Set<DayOfWeek>,
     val selectedMonthDays: Set<Int>,
     val weekCountValues: List<Int>,
     val monthCountValues: List<Int>,
     val everyXDaysValues: List<Int>,
+    val everyXWeeksValues: List<Int>,
+    val everyXMonthsValues: List<Int>,
     val isFlexible: Boolean,
     val dayOfYear: LocalDate,
     val startDate: LocalDate,
     val endDate: LocalDate?,
     val pickerEndDate: LocalDate,
     val resultPattern: RepeatPattern?,
-    @DrawableRes val petAvatar: Int?
+    val petAvatar: PetAvatar
 ) : BaseViewState() {
     enum class StateType {
         LOADING,
