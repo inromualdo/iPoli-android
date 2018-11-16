@@ -35,6 +35,22 @@ class RepeatingQuestViewController(args: Bundle? = null) :
 
     private var repeatingQuestId: String = ""
 
+    private val appBarOffsetListener = object :
+        AppBarStateChangeListener() {
+        override fun onStateChanged(appBarLayout: AppBarLayout, state: State) {
+
+            appBarLayout.post {
+                if (state == State.EXPANDED) {
+                    val supportActionBar = (activity as MainActivity).supportActionBar
+                    supportActionBar?.setDisplayShowTitleEnabled(false)
+                } else if (state == State.COLLAPSED) {
+                    val supportActionBar = (activity as MainActivity).supportActionBar
+                    supportActionBar?.setDisplayShowTitleEnabled(true)
+                }
+            }
+        }
+    }
+
     constructor(
         repeatingQuestId: String
     ) : this() {
@@ -52,22 +68,6 @@ class RepeatingQuestViewController(args: Bundle? = null) :
         setToolbar(view.toolbar)
         view.collapsingToolbarContainer.isTitleEnabled = false
 
-        view.appbar.addOnOffsetChangedListener(object : AppBarStateChangeListener() {
-            override fun onStateChanged(appBarLayout: AppBarLayout, state: State) {
-
-                appBarLayout.post {
-                    if (state == State.EXPANDED) {
-                        val supportActionBar = (activity as MainActivity).supportActionBar
-                        supportActionBar?.setDisplayShowTitleEnabled(false)
-                    } else if (state == State.COLLAPSED) {
-                        val supportActionBar = (activity as MainActivity).supportActionBar
-                        supportActionBar?.setDisplayShowTitleEnabled(true)
-                    }
-                }
-
-            }
-        })
-
         view.subQuestList.layoutManager = LinearLayoutManager(activity!!)
         view.subQuestList.adapter = SubQuestsAdapter()
 
@@ -79,6 +79,8 @@ class RepeatingQuestViewController(args: Bundle? = null) :
                     dispatch(RepeatingQuestAction.AddQuest(repeatingQuestId, date, time))
                 })
         }
+
+        view.appbar.addOnOffsetChangedListener(appBarOffsetListener)
 
         return view
     }
@@ -122,11 +124,19 @@ class RepeatingQuestViewController(args: Bundle? = null) :
     override fun onAttach(view: View) {
         super.onAttach(view)
         showBackButton()
+        val showTitle =
+            appBarOffsetListener.currentState != AppBarStateChangeListener.State.EXPANDED
+        (activity as MainActivity).supportActionBar?.setDisplayShowTitleEnabled(showTitle)
     }
 
     override fun onDetach(view: View) {
         (activity as MainActivity).supportActionBar?.setDisplayShowTitleEnabled(true)
         super.onDetach(view)
+    }
+
+    override fun onDestroyView(view: View) {
+        view.appbar.removeOnOffsetChangedListener(appBarOffsetListener)
+        super.onDestroyView(view)
     }
 
     override fun render(state: RepeatingQuestViewState, view: View) {
