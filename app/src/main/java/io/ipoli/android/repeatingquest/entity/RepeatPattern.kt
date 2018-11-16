@@ -5,7 +5,6 @@ import org.threeten.bp.DayOfWeek
 import org.threeten.bp.LocalDate
 import org.threeten.bp.Month
 import org.threeten.bp.temporal.TemporalAdjusters
-import timber.log.Timber
 
 /**
  * Created by Venelin Valkov <venelin@mypoli.fun>
@@ -32,10 +31,8 @@ sealed class RepeatPattern {
     ): Schedule {
         val s = doCreateSchedule(currentDate)
 
-        val dates = s.dates
-        Timber.d("AAA dates $dates")
         return s.copy(
-            dates = dates.filter { date ->
+            dates = s.dates.filter { date ->
                 lastDate?.let {
                     date.isBeforeOrEqual(lastDate)
                 } ?: true
@@ -82,8 +79,9 @@ sealed class RepeatPattern {
         override val periodCount get() = DayOfWeek.values().size
 
         private fun shouldDoOn(date: LocalDate): Boolean {
-            if (skipEveryXPeriods == 0) return true
-            return startDate.daysUntil(date) % skipEveryXPeriods == 0L
+            val doEveryXDays = skipEveryXPeriods + 1
+            if (doEveryXDays == 1) return true
+            return startDate.daysUntil(date) % doEveryXDays == 0L
         }
 
         override fun doCreateSchedule(currentDate: LocalDate): Schedule {
