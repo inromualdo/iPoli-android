@@ -325,6 +325,8 @@ object RepeatPatternReducer : BaseViewStateReducer<RepeatPatternViewState>() {
                     endDate = state.endDate
                 )
             }
+
+            RepeatType.MANUAL -> RepeatPattern.Manual()
         }
 
     private fun isFlexible(
@@ -342,6 +344,7 @@ object RepeatPatternReducer : BaseViewStateReducer<RepeatPatternViewState>() {
                 val daysCount = state.monthCountValues[state.monthDaysCountIndex]
                 daysCount != state.selectedMonthDays.size
             }
+            RepeatType.MANUAL -> false
         }
 
     private fun repeatTypeForIndex(index: Int) =

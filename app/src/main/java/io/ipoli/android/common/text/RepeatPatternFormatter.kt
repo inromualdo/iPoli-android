@@ -23,5 +23,6 @@ object RepeatPatternFormatter {
                 else
                     context.getString(R.string.times_a_month, repeatPattern.periodCount)
             is RepeatPattern.Yearly -> context.getString(R.string.once_a_year)
+            is RepeatPattern.Manual -> context.getString(R.string.manual_schedule_repeat_pattern)
         }
 }

@@ -69,8 +69,8 @@ data class RepeatingQuestViewState(
         object Daily : RepeatType()
         data class Weekly(val frequency: Int) : RepeatType()
         data class Monthly(val frequency: Int) : RepeatType()
-        data class EveryXDays(val frequency: Int) : RepeatType()
         object Yearly : RepeatType()
+        object Manual : RepeatType()
     }
 }
 
@@ -156,6 +156,8 @@ object RepeatingQuestReducer : BaseViewStateReducer<RepeatingQuestViewState>() {
 
             is RepeatPattern.Yearly ->
                 RepeatingQuestViewState.RepeatType.Yearly
+
+            is RepeatPattern.Manual -> RepeatingQuestViewState.RepeatType.Manual
         }
 
     override fun defaultState() =

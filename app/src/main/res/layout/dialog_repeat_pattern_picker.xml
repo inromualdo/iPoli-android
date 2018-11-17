@@ -29,13 +29,14 @@
             style="@style/Widget.AppCompat.Spinner.DropDown"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:background="@drawable/bordered_rectangle_accent_background"
             android:dropDownWidth="wrap_content"
             android:entries="@array/repeating_quest_picker_frequencies"
             android:paddingStart="4dp"
             android:paddingEnd="4dp"
             app:layout_constraintBottom_toBottomOf="@+id/rpEvery"
-            app:layout_constraintStart_toStartOf="@+id/rpStart"
+            app:layout_constraintStart_toEndOf="@+id/rpEvery"
             app:layout_constraintTop_toTopOf="@+id/rpEvery" />
 
         <TextView
@@ -115,7 +116,6 @@
             android:gravity="center_vertical"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:text="You're choosing flexible pattern"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
@@ -139,7 +139,7 @@
             tools:text="Repeat every" />
 
         <TextView
-            android:id="@+id/textView5"
+            android:id="@+id/rpEndLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
@@ -155,7 +155,7 @@
             tools:text="Until" />
 
         <TextView
-            android:id="@+id/textView6"
+            android:id="@+id/rpStartLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
@@ -213,7 +213,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginTop="24dp"
-            app:layout_constraintStart_toEndOf="@+id/textView6"
+            app:layout_constraintStart_toEndOf="@+id/rpStartLabel"
             app:layout_constraintTop_toBottomOf="@+id/skipEvery"
             tools:text="Today" />
 
@@ -246,6 +246,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:constraint_referenced_ids="textView2,rpTimes,rpCount" />
+
+        <android.support.constraint.Group
+            android:id="@+id/startEndGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="rpEndLabel, rpEnd, rpStartLabel, rpStart" />
 
     </android.support.constraint.ConstraintLayout>
 </ScrollView>

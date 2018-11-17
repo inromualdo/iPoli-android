@@ -442,6 +442,29 @@ sealed class RepeatPattern {
         }
     }
 
+    data class Manual(override val startDate: LocalDate = LocalDate.now()) : RepeatPattern() {
+
+        override val endDate: LocalDate? = null
+
+        override val lastScheduledPeriodStart: LocalDate? = null
+
+        override val skipEveryXPeriods: Int = 0
+
+        override val periodCount: Int
+            get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+
+        override fun periodRangeFor(date: LocalDate) = PeriodRange(startDate, LocalDate.now())
+
+        override fun createPlaceholderDates(
+            startDate: LocalDate,
+            endDate: LocalDate
+        ): List<LocalDate> = emptyList()
+
+        override fun doCreateSchedule(currentDate: LocalDate): Schedule {
+            return Schedule(emptyList(), this)
+        }
+    }
+
 }
 
 data class PeriodRange(val start: LocalDate, val end: LocalDate)
@@ -452,7 +475,8 @@ enum class RepeatType {
     DAILY,
     WEEKLY,
     MONTHLY,
-    YEARLY
+    YEARLY,
+    MANUAL
 }
 
 val RepeatPattern.repeatType: RepeatType
@@ -463,4 +487,5 @@ val RepeatPattern.repeatType: RepeatType
         is RepeatPattern.Monthly -> RepeatType.MONTHLY
         is RepeatPattern.Flexible.Monthly -> RepeatType.MONTHLY
         is RepeatPattern.Yearly -> RepeatType.YEARLY
+        is RepeatPattern.Manual -> RepeatType.MANUAL
     }

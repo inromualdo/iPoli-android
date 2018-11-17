@@ -280,6 +280,9 @@ class RoomRepeatingQuestRepository(dao: RepeatingQuestDao, private val tagDao: T
                     skipEveryXPeriods = rp.skipEveryXPeriods.toInt()
                 )
             }
+
+            MANUAL ->
+                RepeatPattern.Manual(rp.startDate.startOfDayUTC)
         }
     }
 
@@ -383,6 +386,14 @@ class RoomRepeatingQuestRepository(dao: RepeatingQuestDao, private val tagDao: T
                     skipEveryXPeriods = repeatPattern.skipEveryXPeriods.toLong()
                 )
             }
+
+            is RepeatPattern.Manual ->
+                RoomRepeatPattern(
+                    type = MANUAL.name,
+                    startDate = repeatPattern.startDate.startOfDayUTC(),
+                    endDate = null,
+                    skipEveryXPeriods = repeatPattern.skipEveryXPeriods.toLong()
+                )
         }
 
     private fun createDbReminder(reminder: Reminder): DbReminder {
@@ -510,7 +521,7 @@ data class DbRepeatPattern(val map: MutableMap<String, Any?> = mutableMapOf()) {
     var skipEveryXPeriods: Long by map
 
     enum class Type {
-        DAILY, WEEKLY, MONTHLY, YEARLY, FLEXIBLE_WEEKLY, FLEXIBLE_MONTHLY
+        DAILY, WEEKLY, MONTHLY, YEARLY, FLEXIBLE_WEEKLY, FLEXIBLE_MONTHLY, MANUAL
     }
 }
 
@@ -657,6 +668,9 @@ class FirestoreRepeatingQuestRepository(
                     skipEveryXPeriods = rp.skipEveryXPeriods.toInt()
                 )
             }
+
+            MANUAL ->
+                RepeatPattern.Manual(startDate = rp.startDate.startOfDayUTC)
         }
     }
 

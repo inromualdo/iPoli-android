@@ -358,10 +358,8 @@ class RepeatingQuestViewController(args: Bundle? = null) :
                 "Once per year"
             }
 
-            is RepeatingQuestViewState.RepeatType.EveryXDays -> {
-                repeat.frequency.let {
-                    "Every $it days"
-                }
+            RepeatingQuestViewState.RepeatType.Manual -> {
+                stringRes(R.string.manual_schedule_repeat_pattern)
             }
         }
 

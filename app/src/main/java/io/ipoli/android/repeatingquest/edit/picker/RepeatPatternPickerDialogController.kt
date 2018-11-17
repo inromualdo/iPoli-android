@@ -28,7 +28,7 @@ import io.ipoli.android.pet.AndroidPetAvatar
 import io.ipoli.android.repeatingquest.edit.picker.RepeatPatternViewState.StateType.*
 import io.ipoli.android.repeatingquest.entity.RepeatPattern
 import io.ipoli.android.repeatingquest.entity.RepeatType
-import kotlinx.android.synthetic.main.dialog_repeating_picker.view.*
+import kotlinx.android.synthetic.main.dialog_repeat_pattern_picker.view.*
 import kotlinx.android.synthetic.main.view_dialog_header.view.*
 import org.threeten.bp.DayOfWeek
 import org.threeten.bp.LocalDate
@@ -62,7 +62,7 @@ class RepeatPatternPickerDialogController :
 
     @SuppressLint("InflateParams")
     override fun onCreateContentView(inflater: LayoutInflater, savedViewState: Bundle?): View {
-        val view = inflater.inflate(R.layout.dialog_repeating_picker, null)
+        val view = inflater.inflate(R.layout.dialog_repeat_pattern_picker, null)
 
         view.rpWeekDayList.layoutManager =
             LinearLayoutManager(activity!!, LinearLayoutManager.HORIZONTAL, false)
@@ -106,6 +106,7 @@ class RepeatPatternPickerDialogController :
                     ChangeBounds()
                 )
                 renderForRepeatType(state, view)
+                renderMessage(view, state)
             }
 
             WEEK_DAYS_CHANGED -> {
@@ -249,7 +250,20 @@ class RepeatPatternPickerDialogController :
             RepeatType.WEEKLY -> renderWeekly(view, state)
             RepeatType.MONTHLY -> renderMonthly(view, state)
             RepeatType.YEARLY -> renderYearly(view, state)
+            RepeatType.MANUAL -> renderManual(view)
         }
+    }
+
+    private fun renderManual(view: View) {
+        ViewUtils.goneViews(
+            view.rpWeekDayList,
+            view.rpMonthDayList,
+            view.countGroup,
+            view.yearlyPatternGroup,
+            view.skipEvery,
+            view.skipEveryText,
+            view.startEndGroup
+        )
     }
 
     private fun renderYearly(
@@ -262,7 +276,8 @@ class RepeatPatternPickerDialogController :
             view.countGroup
         )
         ViewUtils.showViews(
-            view.yearlyPatternGroup
+            view.yearlyPatternGroup,
+            view.startEndGroup
         )
 
         renderFrequencies(view, state)
@@ -299,7 +314,8 @@ class RepeatPatternPickerDialogController :
         )
         ViewUtils.showViews(
             view.rpMonthDayList,
-            view.countGroup
+            view.countGroup,
+            view.startEndGroup
         )
 
         renderFrequencies(view, state)
@@ -320,7 +336,8 @@ class RepeatPatternPickerDialogController :
         )
         ViewUtils.showViews(
             view.rpWeekDayList,
-            view.countGroup
+            view.countGroup,
+            view.startEndGroup
         )
 
         renderFrequencies(view, state)
@@ -341,6 +358,7 @@ class RepeatPatternPickerDialogController :
             view.yearlyPatternGroup,
             view.countGroup
         )
+        view.startEndGroup.visible()
         renderFrequencies(view, state)
         renderMessage(view, state)
 
@@ -360,12 +378,12 @@ class RepeatPatternPickerDialogController :
         view: View,
         state: RepeatPatternViewState
     ) {
-        if (state.petSchedulingHint == null) {
+        if (state.petSchedulingHintText == null) {
             ViewUtils.goneViews(view.rpPetSchedulingHint)
 
         } else {
             ViewUtils.showViews(view.rpPetSchedulingHint)
-            view.rpPetSchedulingHint.text = state.petSchedulingHint
+            view.rpPetSchedulingHint.text = state.petSchedulingHintText
         }
     }
 
@@ -608,8 +626,13 @@ class RepeatPatternPickerDialogController :
             )
         }
 
-    private val RepeatPatternViewState.petSchedulingHint: String?
+    private val RepeatPatternViewState.petSchedulingHintText: String?
         get() {
+
+            if (repeatType == RepeatType.MANUAL) {
+                return stringRes(R.string.manual_schedule_hint)
+            }
+
             if (!isFlexible) {
                 return null
             }
