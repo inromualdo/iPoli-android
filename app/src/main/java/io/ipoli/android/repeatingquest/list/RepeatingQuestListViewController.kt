@@ -331,16 +331,24 @@ class RepeatingQuestListViewController(args: Bundle? = null) :
                 } else stringRes(R.string.never)
 
                 val progressText = when (it.repeatPattern.repeatType) {
-                    RepeatType.DAILY -> "$remaining more this week"
-                    RepeatType.WEEKLY -> "$remaining more this week"
+                    RepeatType.DAILY -> if (remaining > 0) "$remaining more this week" else "All done this week"
+                    RepeatType.WEEKLY -> if (remaining > 0) "$remaining more this week" else "All done this week"
                     RepeatType.MONTHLY -> {
-                        val remainingText = "$remaining more this month"
-                        if (needToCompleteCount > 10)
-                            "${progress.completedCount}/${needToCompleteCount} done $remainingText"
-                        else remainingText
+                        if (needToCompleteCount > 0 && remaining == 0)
+                            "All done this month"
+                        else if (needToCompleteCount > 10)
+                            "${progress.completedCount}/$needToCompleteCount done $remaining more this month"
+                        else "$remaining more this month"
                     }
-                    RepeatType.YEARLY -> "$remaining more this year"
-                    RepeatType.MANUAL -> "Manually scheduled. Last done: $lastCompletedText"
+                    RepeatType.YEARLY -> if (remaining > 0) "$remaining more this year" else "All done this year"
+                    RepeatType.MANUAL -> {
+                        if (needToCompleteCount > 0 && remaining > 0)
+                            "$remaining more this week"
+                        else if (needToCompleteCount > 0)
+                            "All done this week"
+                        else "Last done: $lastCompletedText"
+
+                    }
                 }
 
                 RepeatingQuestItemViewModel.RepeatingQuestViewModel(
