@@ -277,7 +277,7 @@ class HabitViewController(args: Bundle? = null) :
         get() = weekProgress.map {
             when (it) {
                 HabitViewState.WeekProgress.INCOMPLETE ->
-                    colorRes(R.color.md_red_300)
+                    colorRes(color500)
 
                 HabitViewState.WeekProgress.COMPLETE ->
                     colorRes(R.color.md_white)
