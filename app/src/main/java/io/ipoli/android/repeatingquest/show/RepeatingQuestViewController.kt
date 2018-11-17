@@ -308,7 +308,7 @@ class RepeatingQuestViewController(args: Bundle? = null) :
             lastCompletedDate != null -> {
                 DateFormatter.format(view!!.context, lastCompletedDate)
             }
-            else -> stringRes(R.string.not_done_yet)
+            else -> stringRes(R.string.never)
         }
 
 
