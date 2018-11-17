@@ -552,7 +552,7 @@
         <item>Weekly</item>
         <item>Monthly</item>
         <item>Yearly</item>
-        <item>Week</item>
+        <item>Manual</item>
     </string-array>
 
     <string-array name="difficulties">

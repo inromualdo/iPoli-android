@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.support.annotation.ColorInt
 import android.support.annotation.ColorRes
+import android.support.annotation.LayoutRes
 import android.support.v4.widget.TextViewCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
@@ -122,7 +124,8 @@ class RepeatingQuestListViewController(args: Bundle? = null) :
             val next: String,
             val completedCount: Int,
             val allCount: Int,
-            val frequency: String
+            val frequency: String,
+            val progress: List<ProgressViewModel>
         ) : RepeatingQuestItemViewModel(id)
 
         data class CompletedLabel(
@@ -137,6 +140,12 @@ class RepeatingQuestListViewController(args: Bundle? = null) :
             @ColorRes val color: Int,
             val frequency: String
         ) : RepeatingQuestItemViewModel(id)
+
+        data class ProgressViewModel(
+            @LayoutRes val layout: Int,
+            @ColorInt val color: Int,
+            @ColorInt val strokeColor: Int
+        )
     }
 
 
@@ -165,12 +174,37 @@ class RepeatingQuestListViewController(args: Bundle? = null) :
                 view.rqNext.text = vm.next
                 view.rqFrequency.text = vm.frequency
 
-                val progressBar = view.rqProgressBar
+//                val progressBar = view.rqProgressBar
                 val progress = view.rqProgress
-                ViewUtils.showViews(progressBar, progress)
-                progressBar.max = vm.allCount
-                progressBar.progress = vm.completedCount
-                progressBar.progressTintList = ColorStateList.valueOf(colorRes(vm.color))
+//                ViewUtils.showViews(progressBar, progress)
+                ViewUtils.showViews(progress)
+//                progressBar.max = vm.allCount
+//                progressBar.progress = vm.completedCount
+//                progressBar.progressTintList = ColorStateList.valueOf(colorRes(vm.color))
+
+
+                val inflater = LayoutInflater.from(view.context)
+                view.rqProgressBar.removeAllViews()
+
+                for (pvm in vm.progress) {
+                    val progressViewEmpty = inflater.inflate(
+                        R.layout.item_repeating_quest_progress_indicator_empty,
+                        view.rqProgressBar,
+                        false
+                    )
+                    val progressViewEmptyBackground =
+                        progressViewEmpty.background as GradientDrawable
+                    progressViewEmptyBackground.setStroke(
+                        ViewUtils.dpToPx(2f, view.context).toInt(),
+                        pvm.strokeColor
+                    )
+
+                    progressViewEmptyBackground.setColor(pvm.color)
+
+                    view.rqProgressBar.addView(progressViewEmpty)
+                }
+
+
                 @SuppressLint("SetTextI18n")
                 progress.text = "${vm.completedCount}/${vm.allCount}"
 
@@ -206,7 +240,7 @@ class RepeatingQuestListViewController(args: Bundle? = null) :
                 view.rqIcon.backgroundTintList =
                     ColorStateList.valueOf(colorRes(vm.color))
                 view.rqIcon.setImageDrawable(listItemIcon(vm.icon))
-                ViewUtils.hideViews(view.rqProgressBar, view.rqProgress)
+//                ViewUtils.hideViews(view.rqProgressBar, view.rqProgress)
 
                 view.rqNext.setText(R.string.completed)
                 view.rqFrequency.text = vm.frequency
@@ -269,17 +303,37 @@ class RepeatingQuestListViewController(args: Bundle? = null) :
                     )
                 }
 
+                val rqColor = AndroidColor.valueOf(it.color.name).color500
+
+                val progress = it.periodProgress!!
+
+                val complete = (0 until progress.completedCount).map { _ ->
+                    RepeatingQuestItemViewModel.ProgressViewModel(
+                        layout = R.layout.repeating_quest_progress_indicator_empty,
+                        color = colorRes(rqColor),
+                        strokeColor = colorRes(rqColor)
+                    )
+                }
+                val incomplete = (progress.completedCount until progress.allCount).map { _ ->
+                    RepeatingQuestItemViewModel.ProgressViewModel(
+                        layout = R.layout.repeating_quest_progress_indicator_empty,
+                        color = colorRes(colorSurfaceResource),
+                        strokeColor = colorRes(rqColor)
+                    )
+                }
+
                 RepeatingQuestItemViewModel.RepeatingQuestViewModel(
                     id = it.id,
                     name = it.name,
                     tags = it.tags.map { TagViewModel(it.name, it.color.androidColor.color500) },
                     icon = it.icon?.let { AndroidIcon.valueOf(it.name).icon }
                         ?: Ionicons.Icon.ion_checkmark,
-                    color = AndroidColor.valueOf(it.color.name).color500,
+                    color = rqColor,
                     next = next,
-                    completedCount = it.periodProgress!!.completedCount,
-                    allCount = it.periodProgress.allCount,
-                    frequency = frequencies[it.repeatPattern.repeatType.ordinal]
+                    completedCount = progress.completedCount,
+                    allCount = progress.allCount,
+                    frequency = frequencies[it.repeatPattern.repeatType.ordinal],
+                    progress = complete + incomplete
                 )
             }
         )
