@@ -129,6 +129,9 @@ class AddRepeatingQuestViewController(args: Bundle? = null) :
                 toolbarTitle = state.toolbarTitle
             }
 
+            EditRepeatingQuestViewState.StateType.TAGS_CHANGED ->
+                colorLayout(view, state.color)
+
             EditRepeatingQuestViewState.StateType.COLOR_CHANGED ->
                 colorLayout(view, state.color)
 
@@ -242,8 +245,11 @@ class AddRepeatingQuestViewController(args: Bundle? = null) :
                 EditRepeatingQuestViewState.StateType.VALIDATION_ERROR_EMPTY_NAME ->
                     view.rqName.error = stringRes(R.string.name_validation)
 
-                EditRepeatingQuestViewState.StateType.TAGS_CHANGED ->
+                EditRepeatingQuestViewState.StateType.TAGS_CHANGED -> {
                     renderTags(state, view)
+                    renderColor(state, view)
+                    renderIcon(state, view)
+                }
 
                 else -> {
                 }
@@ -673,11 +679,10 @@ class AddRepeatingQuestViewController(args: Bundle? = null) :
             state: EditRepeatingQuestViewState
         ) {
             view.summaryColor.onDebounceClick {
-
                 navigate()
                     .toColorPicker(
-                        {
-                            dispatch(EditRepeatingQuestAction.ChangeColor(it))
+                        { c ->
+                            dispatch(EditRepeatingQuestAction.ChangeColor(c))
                         }, state.color
                     )
             }
