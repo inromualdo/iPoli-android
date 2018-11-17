@@ -510,7 +510,7 @@ object Migration10To11 : Migration(10, 11) {
     override fun migrate(database: SupportSQLiteDatabase) {
         database.execSQL("ALTER TABLE repeating_quests ADD COLUMN `repeatPattern_skipEveryXPeriods` INTEGER NOT NULL DEFAULT 0")
         database.execSQL("ALTER TABLE repeating_quests ADD COLUMN `repeatPattern_lastScheduledPeriodStart` INTEGER DEFAULT NULL")
-        database.execSQL("UPDATE repeating_quests SET repeatPattern_skipEveryXPeriods = repeatPattern_xDays WHERE repeatPattern_xDays IS NOT NULL")
+        database.execSQL("UPDATE repeating_quests SET repeatPattern_skipEveryXPeriods = repeatPattern_xDays - 1 WHERE repeatPattern_xDays IS NOT NULL")
 
         val currentTimeMillis: Long = System.currentTimeMillis()
         val currentDate = LocalDate.now().startOfDayUTC()
