@@ -4,7 +4,6 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.support.annotation.ColorInt
-import android.support.annotation.LayoutRes
 import android.support.design.widget.AppBarLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.view.*
@@ -22,6 +21,7 @@ import io.ipoli.android.tag.Tag
 import kotlinx.android.synthetic.main.controller_repeating_quest.view.*
 import kotlinx.android.synthetic.main.item_quest_tag_list.view.*
 import kotlinx.android.synthetic.main.item_repeating_quest_sub_quest.view.*
+import kotlinx.android.synthetic.main.repeating_quest_progress_indicator_empty.view.*
 
 
 /**
@@ -231,22 +231,26 @@ class RepeatingQuestViewController(args: Bundle? = null) :
         val inflater = LayoutInflater.from(view.context)
         view.progressContainer.removeAllViews()
 
-        for (vm in state.progressViewModels) {
-            val progressViewEmpty = inflater.inflate(
-                vm.layout,
+        state.progressViewModels.forEachIndexed { index, vm ->
+            val progressView = inflater.inflate(
+                R.layout.repeating_quest_progress_indicator_empty,
                 view.progressContainer,
                 false
             )
-            val progressViewEmptyBackground =
-                progressViewEmpty.background as GradientDrawable
-            progressViewEmptyBackground.setStroke(
-                ViewUtils.dpToPx(1.5f, view.context).toInt(),
-                vm.color
+            val indicatorView =
+                progressView.indicatorDot.background as GradientDrawable
+            indicatorView.setStroke(
+                ViewUtils.dpToPx(2f, view.context).toInt(),
+                colorRes(R.color.md_white)
             )
 
-            progressViewEmptyBackground.setColor(vm.color)
+            indicatorView.setColor(vm.color)
 
-            view.progressContainer.addView(progressViewEmpty)
+            if (index == 0) {
+                progressView.indicatorLink.gone()
+            }
+
+            view.progressContainer.addView(progressView)
         }
 
         view.frequencyText.text = state.frequencyText
@@ -288,17 +292,11 @@ class RepeatingQuestViewController(args: Bundle? = null) :
         get() = progress.map {
             when (it) {
                 RepeatingQuestViewState.ProgressModel.COMPLETE -> {
-                    ProgressViewModel(
-                        R.layout.repeating_quest_progress_indicator_empty,
-                        attrData(R.attr.colorAccent)
-                    )
+                    ProgressViewModel(colorRes(R.color.md_white))
                 }
 
                 RepeatingQuestViewState.ProgressModel.INCOMPLETE -> {
-                    ProgressViewModel(
-                        R.layout.repeating_quest_progress_indicator_empty,
-                        colorRes(R.color.md_white)
-                    )
+                    ProgressViewModel(colorRes(color500))
                 }
             }
         }
@@ -363,5 +361,5 @@ class RepeatingQuestViewController(args: Bundle? = null) :
             }
         }
 
-    data class ProgressViewModel(@LayoutRes val layout: Int, @ColorInt val color: Int)
+    data class ProgressViewModel(@ColorInt val color: Int)
 }

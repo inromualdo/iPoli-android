@@ -1,7 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<View xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="18dp"
-    android:layout_height="18dp"
-    android:layout_marginEnd="4dp"
-    android:layout_marginStart="4dp"
-    android:background="@drawable/ic_repeating_quest_context_progress_indicator_empty" />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <View
+        android:id="@+id/indicatorLink"
+        android:layout_width="4dp"
+        android:layout_height="2dp"
+        android:layout_gravity="center_vertical"
+        android:background="@color/md_white" />
+
+    <View
+        android:id="@+id/indicatorDot"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_gravity="center_vertical"
+        android:background="@drawable/ic_repeating_quest_context_progress_indicator_empty" />
+
+</LinearLayout>

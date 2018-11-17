@@ -6,7 +6,6 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.support.annotation.ColorInt
 import android.support.annotation.ColorRes
-import android.support.annotation.LayoutRes
 import android.support.v4.widget.TextViewCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
@@ -142,7 +141,6 @@ class RepeatingQuestListViewController(args: Bundle? = null) :
         ) : RepeatingQuestItemViewModel(id)
 
         data class ProgressViewModel(
-            @LayoutRes val layout: Int,
             @ColorInt val color: Int,
             @ColorInt val strokeColor: Int
         )
@@ -311,14 +309,12 @@ class RepeatingQuestListViewController(args: Bundle? = null) :
 
                 val complete = (0 until progress.completedCount).map { _ ->
                     RepeatingQuestItemViewModel.ProgressViewModel(
-                        layout = R.layout.repeating_quest_progress_indicator_empty,
                         color = colorRes(rqColor),
                         strokeColor = colorRes(rqColor)
                     )
                 }
                 val incomplete = (progress.completedCount until needToCompleteCount).map { _ ->
                     RepeatingQuestItemViewModel.ProgressViewModel(
-                        layout = R.layout.repeating_quest_progress_indicator_empty,
                         color = colorRes(colorSurfaceResource),
                         strokeColor = colorRes(rqColor)
                     )
