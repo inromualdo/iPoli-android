@@ -40,8 +40,9 @@ class CreatePlaceholderQuestsForRepeatingQuestsUseCase(
             val currEnd = if (rqEnd != null && rqEnd.isBefore(end)) rqEnd else end
 
             val scheduleDates = it.repeatPattern.createPlaceholderDates(
-                currStart,
-                currEnd
+                startDate = currStart,
+                endDate = currEnd,
+                skipScheduled = true
             )
 
             if (scheduleDates.isNotEmpty()) {
