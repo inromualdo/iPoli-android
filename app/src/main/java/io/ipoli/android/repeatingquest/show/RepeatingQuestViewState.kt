@@ -137,7 +137,7 @@ object RepeatingQuestReducer : BaseViewStateReducer<RepeatingQuestViewState>() {
         val complete = (0 until progress.completedCount).map {
             RepeatingQuestViewState.ProgressModel.COMPLETE
         }
-        val incomplete = (progress.completedCount until progress.allCount).map {
+        val incomplete = (progress.completedCount until progress.scheduledCount).map {
             RepeatingQuestViewState.ProgressModel.INCOMPLETE
         }
         return complete + incomplete

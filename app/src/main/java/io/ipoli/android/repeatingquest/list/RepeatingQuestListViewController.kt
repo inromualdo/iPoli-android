@@ -306,6 +306,9 @@ class RepeatingQuestListViewController(args: Bundle? = null) :
 
                 val progress = it.periodProgress!!
 
+                val needToCompleteCount =
+                    Math.max(progress.needToCompleteCount, progress.scheduledCount)
+
                 val complete = (0 until progress.completedCount).map { _ ->
                     RepeatingQuestItemViewModel.ProgressViewModel(
                         layout = R.layout.repeating_quest_progress_indicator_empty,
@@ -313,7 +316,7 @@ class RepeatingQuestListViewController(args: Bundle? = null) :
                         strokeColor = colorRes(rqColor)
                     )
                 }
-                val incomplete = (progress.completedCount until progress.allCount).map { _ ->
+                val incomplete = (progress.completedCount until needToCompleteCount).map { _ ->
                     RepeatingQuestItemViewModel.ProgressViewModel(
                         layout = R.layout.repeating_quest_progress_indicator_empty,
                         color = colorRes(colorSurfaceResource),
@@ -321,7 +324,7 @@ class RepeatingQuestListViewController(args: Bundle? = null) :
                     )
                 }
 
-                val remaining = progress.allCount - progress.completedCount
+                val remaining = needToCompleteCount - progress.completedCount
 
                 val lastCompletedText = if (it.lastCompletedDate != null) {
                     DateFormatter.format(view!!.context, it.lastCompletedDate)
@@ -332,8 +335,8 @@ class RepeatingQuestListViewController(args: Bundle? = null) :
                     RepeatType.WEEKLY -> "$remaining more this week"
                     RepeatType.MONTHLY -> {
                         val remainingText = "$remaining more this month"
-                        if (progress.allCount > 10)
-                            "${progress.completedCount}/${progress.allCount} done $remainingText"
+                        if (needToCompleteCount > 10)
+                            "${progress.completedCount}/${needToCompleteCount} done $remainingText"
                         else remainingText
                     }
                     RepeatType.YEARLY -> "$remaining more this year"
@@ -349,7 +352,7 @@ class RepeatingQuestListViewController(args: Bundle? = null) :
                     color = rqColor,
                     next = next,
                     completedCount = progress.completedCount,
-                    allCount = progress.allCount,
+                    allCount = needToCompleteCount,
                     progress = complete + incomplete,
                     progressText = progressText
                 )

@@ -453,23 +453,26 @@ sealed class RepeatPattern {
         override val periodCount: Int
             get() = 0
 
-        override fun periodRangeFor(date: LocalDate) = PeriodRange(startDate, LocalDate.now())
+        override fun periodRangeFor(date: LocalDate) =
+            PeriodRange(
+                start = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
+                end = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+            )
 
         override fun createPlaceholderDates(
             startDate: LocalDate,
             endDate: LocalDate
         ): List<LocalDate> = emptyList()
 
-        override fun doCreateSchedule(currentDate: LocalDate): Schedule {
-            return Schedule(emptyList(), this)
-        }
+        override fun doCreateSchedule(currentDate: LocalDate) =
+            Schedule(emptyList(), this)
     }
 
 }
 
 data class PeriodRange(val start: LocalDate, val end: LocalDate)
 
-data class PeriodProgress(val completedCount: Int, val allCount: Int)
+data class PeriodProgress(val completedCount: Int, val needToCompleteCount: Int, val scheduledCount: Int)
 
 enum class RepeatType {
     DAILY,
