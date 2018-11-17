@@ -137,7 +137,11 @@ sealed class RepeatPattern {
 
             val dates = mutableListOf<LocalDate>()
             while (periodStart.isBeforeOrEqual(endDate)) {
-                dates.add(LocalDate.of(periodStart.year, month, dayOfMonth))
+                val date = LocalDate.of(periodStart.year, month, dayOfMonth)
+                if (date.isAfter(endDate)) {
+                    break
+                }
+                dates.add(date)
                 periodStart = periodStart.plusYears(1)
             }
 
@@ -472,7 +476,11 @@ sealed class RepeatPattern {
 
 data class PeriodRange(val start: LocalDate, val end: LocalDate)
 
-data class PeriodProgress(val completedCount: Int, val needToCompleteCount: Int, val scheduledCount: Int)
+data class PeriodProgress(
+    val completedCount: Int,
+    val needToCompleteCount: Int,
+    val scheduledCount: Int
+)
 
 enum class RepeatType {
     DAILY,
