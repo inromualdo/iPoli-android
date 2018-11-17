@@ -16,7 +16,11 @@ sealed class RepeatPattern {
     abstract val endDate: LocalDate?
     abstract val lastScheduledPeriodStart: LocalDate?
     abstract val skipEveryXPeriods: Int
-    abstract val periodCount: Int
+
+    fun countForPeriod(dateInPeriod: LocalDate = LocalDate.now()): Int {
+        val periodRange = periodRangeFor(dateInPeriod)
+        return createPlaceholderDates(periodRange.start, periodRange.end).size
+    }
 
     abstract fun periodRangeFor(date: LocalDate): PeriodRange
 
@@ -76,8 +80,6 @@ sealed class RepeatPattern {
                 end = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
             )
 
-        override val periodCount get() = DayOfWeek.values().size
-
         private fun shouldDoOn(date: LocalDate): Boolean {
             val doEveryXDays = skipEveryXPeriods + 1
             if (doEveryXDays == 1) return true
@@ -119,7 +121,6 @@ sealed class RepeatPattern {
     ) : RepeatPattern() {
 
         override val skipEveryXPeriods: Int = 0
-        override val periodCount get() = 1
 
         override fun createPlaceholderDates(
             startDate: LocalDate,
@@ -183,8 +184,6 @@ sealed class RepeatPattern {
         override val lastScheduledPeriodStart: LocalDate? = null,
         override val skipEveryXPeriods: Int = 0
     ) : RepeatPattern() {
-
-        override val periodCount get() = daysOfWeek.size
 
         override fun createPlaceholderDates(
             startDate: LocalDate,
@@ -282,8 +281,6 @@ sealed class RepeatPattern {
             }
         }
 
-        override val periodCount get() = daysOfMonth.size
-
         override fun periodRangeFor(date: LocalDate) =
             PeriodRange(
                 start = date.with(TemporalAdjusters.firstDayOfMonth()),
@@ -340,8 +337,6 @@ sealed class RepeatPattern {
                     start = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
                     end = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
                 )
-
-            override val periodCount get() = timesPerWeek
 
             override fun doCreateSchedule(currentDate: LocalDate): Schedule {
                 val nextMonday = currentDate.plusWeeks(1).with(
@@ -402,8 +397,6 @@ sealed class RepeatPattern {
                     end = date.with(TemporalAdjusters.lastDayOfMonth())
                 )
 
-            override val periodCount get() = timesPerMonth
-
             override fun doCreateSchedule(
                 currentDate: LocalDate
             ): Schedule {
@@ -453,9 +446,6 @@ sealed class RepeatPattern {
         override val lastScheduledPeriodStart: LocalDate? = null
 
         override val skipEveryXPeriods: Int = 0
-
-        override val periodCount: Int
-            get() = 0
 
         override fun periodRangeFor(date: LocalDate) =
             PeriodRange(
