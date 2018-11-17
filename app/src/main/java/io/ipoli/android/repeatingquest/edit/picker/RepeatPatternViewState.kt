@@ -106,7 +106,29 @@ object RepeatPatternReducer : BaseViewStateReducer<RepeatPatternViewState>() {
                 val isFlexible =
                     pattern?.let { it is RepeatPattern.Flexible } ?: defaultState().isFlexible
 
-                val everyXDaysCountIndex = defaultState().everyXDaysCountIndex
+                val everyXDaysCountIndex = pattern?.let {
+                    if (it is RepeatPattern.Daily) {
+                        it.skipEveryXPeriods
+                    } else {
+                        null
+                    }
+                } ?: defaultState().everyXDaysCountIndex
+
+                val everyXWeeksCountIndex = pattern?.let {
+                    if (it is RepeatPattern.Weekly) {
+                        it.skipEveryXPeriods
+                    } else {
+                        null
+                    }
+                } ?: defaultState().everyXWeeksCountIndex
+
+                val everyXMonthsCountIndex = pattern?.let {
+                    if (it is RepeatPattern.Monthly) {
+                        it.skipEveryXPeriods
+                    } else {
+                        null
+                    }
+                } ?: defaultState().everyXMonthsCountIndex
 
                 subState.copy(
                     type = if (state.dataState.player == null) LOADING else DATA_LOADED,
@@ -115,6 +137,8 @@ object RepeatPatternReducer : BaseViewStateReducer<RepeatPatternViewState>() {
                     weekDaysCountIndex = weekDaysCountIndex,
                     monthDaysCountIndex = monthDaysCountIndex,
                     everyXDaysCountIndex = everyXDaysCountIndex,
+                    everyXWeeksCountIndex = everyXWeeksCountIndex,
+                    everyXMonthsCountIndex = everyXMonthsCountIndex,
                     selectedWeekDays = selectedWeekDays,
                     selectedMonthDays = selectedMonthDays,
                     isFlexible = isFlexible,
@@ -256,13 +280,6 @@ object RepeatPatternReducer : BaseViewStateReducer<RepeatPatternViewState>() {
 
             RepeatType.WEEKLY ->
                 when {
-                    state.selectedWeekDays.size == 7 ->
-                        RepeatPattern.Daily(
-                            startDate = state.startDate,
-                            endDate = state.endDate,
-                            skipEveryXPeriods = state.everyXWeeksCountIndex * 7
-                        )
-
                     state.isFlexible ->
                         RepeatPattern.Flexible.Weekly(
                             timesPerWeek = state.weekDaysCount,
