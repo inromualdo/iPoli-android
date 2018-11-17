@@ -29,6 +29,7 @@ import io.ipoli.android.repeatingquest.entity.repeatType
 import io.ipoli.android.repeatingquest.list.RepeatingQuestListViewState.StateType.CHANGED
 import kotlinx.android.synthetic.main.controller_repeating_quest_list.view.*
 import kotlinx.android.synthetic.main.item_repeating_quest.view.*
+import kotlinx.android.synthetic.main.item_repeating_quest_progress_indicator_empty.view.*
 import kotlinx.android.synthetic.main.view_empty_list.view.*
 import kotlinx.android.synthetic.main.view_loader.view.*
 
@@ -186,22 +187,29 @@ class RepeatingQuestListViewController(args: Bundle? = null) :
                 val inflater = LayoutInflater.from(view.context)
                 view.rqProgressBar.removeAllViews()
 
-                for (pvm in vm.progress) {
-                    val progressViewEmpty = inflater.inflate(
+                vm.progress.forEachIndexed { index, pvm ->
+                    val progressView = inflater.inflate(
                         R.layout.item_repeating_quest_progress_indicator_empty,
                         view.rqProgressBar,
                         false
                     )
+
                     val progressViewEmptyBackground =
-                        progressViewEmpty.background as GradientDrawable
+                        progressView.indicatorDot.background as GradientDrawable
                     progressViewEmptyBackground.setStroke(
                         ViewUtils.dpToPx(2f, view.context).toInt(),
                         pvm.strokeColor
                     )
 
+                    progressView.indicatorLink.setBackgroundColor(pvm.strokeColor)
+
+                    if(index == 0) {
+                        progressView.indicatorLink.gone()
+                    }
+
                     progressViewEmptyBackground.setColor(pvm.color)
 
-                    view.rqProgressBar.addView(progressViewEmpty)
+                    view.rqProgressBar.addView(progressView)
                 }
 
 
