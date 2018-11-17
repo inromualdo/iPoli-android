@@ -451,7 +451,7 @@ sealed class RepeatPattern {
         override val skipEveryXPeriods: Int = 0
 
         override val periodCount: Int
-            get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+            get() = 0
 
         override fun periodRangeFor(date: LocalDate) = PeriodRange(startDate, LocalDate.now())
 

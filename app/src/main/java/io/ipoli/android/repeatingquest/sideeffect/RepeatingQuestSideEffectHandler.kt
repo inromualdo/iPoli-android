@@ -105,4 +105,5 @@ object RepeatingQuestSideEffectHandler : AppSideEffectHandler() {
             || action is EditRepeatingQuestAction.SaveNew
             || action is RepeatingQuestAction.Remove
             || action is RepeatingQuestAction.Load
+            || action is RepeatingQuestAction.AddQuest
 }
